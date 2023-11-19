@@ -21,6 +21,13 @@ display: flex;
 justify-content: center;
 }
 
+.game-container{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
 #chat-box{
   border: 1px solid black;
   flex-grow: 1;

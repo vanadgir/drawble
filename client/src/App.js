@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import ChatBox from "./components/ChatBox";
+import RoomMenu from "./components/RoomMenu";
 import "./App.css";
 
 export default function App() {
@@ -7,15 +7,18 @@ export default function App() {
   const [userEmail, setUserEmail] = useState(null);
   const url = "http://localhost:8080";
 
+  // login redirect
   const handleLogin = () => {
     window.location.href = `${url}/auth/google`;
   };
 
+  // logout redirect
   const handleLogout = () => {
     setIsVerified(false);
     window.location.href = `${url}/logout`;
   };
 
+  // checking auth status
   useEffect(() => {
     const checkAuthentication = async () => {
       try {
@@ -43,10 +46,10 @@ export default function App() {
     <div className="main">
       <h1>drawble</h1>
       {isVerified ? (
-        <>
-          <ChatBox email={userEmail}/>
+        <div className="game-container">
+          <RoomMenu email={userEmail}/>
           <button onClick={handleLogout}>Logout</button>
-        </>
+        </div>
       ) : (
         <button onClick={handleLogin}>Login with Google</button>
       )}

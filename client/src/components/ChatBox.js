@@ -95,8 +95,8 @@ export default function ChatBox({ email }) {
             rows={5}
             cols={70}
             onKeyDown={handleKeyPress}
+            maxLength="160"
           ></textarea>
-          <button type="submit">Send</button>
         </form>
       </div>
     </>
