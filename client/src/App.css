@@ -21,6 +21,19 @@ display: flex;
 justify-content: center;
 }
 
+.room-menu{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-bottom: 5%;
+}
+
+.room-controls{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
 .game-container{
   display: flex;
   flex-direction: column;

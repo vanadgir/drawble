@@ -88,6 +88,13 @@ app.get("/logout", (req, res) => {
   });
 });
 
+// track active rooms
+const rooms = {};
+
+app.post("/createRoom", isLoggedIn, (req, res) => {
+  const roomKey = 12345;
+})
+
 // track active users
 const activeUsers = {};
 

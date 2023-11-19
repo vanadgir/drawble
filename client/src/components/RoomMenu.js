@@ -1,10 +1,11 @@
+import { useState } from "react";
 import ChatBox from "./ChatBox";
 
 export default function RoomMenu({ email }) {
 
-  return(
+  return (
     <>
-      <ChatBox email={email} />
+    <ChatBox email={email}/>
     </>
-  )
+  );
 }
