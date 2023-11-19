@@ -25,7 +25,7 @@ justify-content: center;
   border: 1px solid black;
   flex-grow: 1;
   overflow-y: auto;
-  height: 60vh;
+  height: 55vh;
   width: 80vw;
   margin: 2%;
 }
@@ -34,14 +34,19 @@ justify-content: center;
   background-color: lightgray;
 }
 
+.user-icon{
+  width: 30px;
+  height: 30px;
+}
+
 .message{
   display: flex;
   flex-direction: row;
-  padding: 3%;
+  padding: 16px;
 }
 
 .username{
-  min-width: 100px;
+  min-width: 80px;
   margin-right: 10%;
 }
 

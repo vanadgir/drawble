@@ -44,7 +44,7 @@ export default function App() {
       <h1>drawble</h1>
       {isVerified ? (
         <>
-          <ChatBox userEmail={userEmail}/>
+          <ChatBox email={userEmail}/>
           <button onClick={handleLogout}>Logout</button>
         </>
       ) : (

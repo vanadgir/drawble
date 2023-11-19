@@ -39,7 +39,7 @@ function isLoggedIn(req, res, next) {
   if (req.user) {
     return next();
   } else {
-    return res.status(401).json({ authenticated: false, user: "Please Login" });
+    return res.json({ authenticated: false, user: "Please Login" });
   }
 }
 

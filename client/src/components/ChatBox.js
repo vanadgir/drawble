@@ -2,12 +2,12 @@ import { useEffect, useState, useRef } from "react";
 import { io } from "socket.io-client";
 
 // main chat box component
-export default function ChatBox({ userEmail }) {
+export default function ChatBox({ email }) {
   const [socket, setSocket] = useState(null);
   const [messages, setMessages] = useState([]);
   const chatBoxRef = useRef(null);
   const messageInputRef = useRef(null);
-  const usernameRef = useRef(userEmail.split('@')[0]);
+  const usernameRef = useRef(email.split('@')[0]);
 
   // function for submitting form
   const handleSubmit = (event) => {
@@ -33,7 +33,7 @@ export default function ChatBox({ userEmail }) {
   const displayMessage = (name, text) => {
     const message = {
       name,
-      text,
+      text
     };
 
     // update messages list
@@ -55,8 +55,8 @@ export default function ChatBox({ userEmail }) {
     // connect
     socket.on("connect", () => {
       setSocket(socket);
-      displayMessage(username, "has connected.");
-      socket.emit("new-message", { username, text: "has connected." });
+      displayMessage("SYSTEM: ", `${username} has connected.`);
+      socket.emit("new-message", { username: "SYSTEM: ", text: `${username} has connected.` });
 
       socket.emit("join", username);
     });
@@ -68,7 +68,7 @@ export default function ChatBox({ userEmail }) {
     
     // user disconnect notification
     socket.on("user-disconnected", (disconnectedUser) => {
-      displayMessage(disconnectedUser, "has disconnected")
+      displayMessage("SYSTEM: ", `${disconnectedUser} has disconnected.`)
     });
  
     return () => {
@@ -91,9 +91,9 @@ export default function ChatBox({ userEmail }) {
           <textarea
             id="message-input"
             ref={messageInputRef}
-            placeholder="Message..."
-            rows={4}
-            cols={30}
+            placeholder={`Chatting as ${usernameRef.current}`}
+            rows={5}
+            cols={70}
             onKeyDown={handleKeyPress}
           ></textarea>
           <button type="submit">Send</button>
