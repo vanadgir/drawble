@@ -2,22 +2,22 @@ import { useEffect, useState, useRef } from "react";
 import { io } from "socket.io-client";
 
 // main chat box component
-export default function ChatBox({ email }) {
+export default function ChatBox({ username, roomKey }) {
+  const [textFieldDims, setTextFieldDims] = useState({rows:5, cols:70});
   const [socket, setSocket] = useState(null);
   const [messages, setMessages] = useState([]);
   const chatBoxRef = useRef(null);
   const messageInputRef = useRef(null);
-  const usernameRef = useRef(email.split('@')[0]);
 
   // function for submitting form
   const handleSubmit = (event) => {
-    const username = usernameRef.current;
     event.preventDefault();
     const text = messageInputRef.current.value;
-    if (!text) return;
+    if (!text || !roomKey) return;
 
-    displayMessage(username, text);
-    socket.emit("new-message", { username, text });
+    // displayMessage(username, text);
+
+    socket.emit("new-message", { username, text, roomKey });
     messageInputRef.current.value = "";
   };
 
@@ -40,6 +40,24 @@ export default function ChatBox({ email }) {
     setMessages((prevMessages) => [...prevMessages, message]);
   };
 
+  // function for resizing text field
+  const updateTextFieldDims = () => {
+    const rows = Math.floor(window.innerHeight / 200);
+    const cols = Math.floor(window.innerWidth / 10);
+
+    setTextFieldDims({rows, cols});
+  };
+
+  useEffect(() => {
+    window.addEventListener("resize", updateTextFieldDims);
+    updateTextFieldDims();
+
+    return () => {
+      window.removeEventListener("resize", updateTextFieldDims);
+    };
+  }, []);
+
+
   useEffect(() => {
     // focus on latest message
     if (chatBoxRef.current) {
@@ -50,15 +68,16 @@ export default function ChatBox({ email }) {
   // socket connection events
   useEffect(() => {
     const socket = io("http://localhost:8080");
-    const username = usernameRef.current;
 
     // connect
     socket.on("connect", () => {
       setSocket(socket);
       displayMessage("SYSTEM: ", `${username} has connected.`);
-      socket.emit("new-message", { username: "SYSTEM: ", text: `${username} has connected.` });
+      socket.emit("join-room", {username, roomKey});
+    });
 
-      socket.emit("join", username);
+    socket.on("user-connected", ({username}) => {
+      displayMessage("SYSTEM: ", `${username} has connected.`)
     });
 
     // receive broadcasted message
@@ -72,9 +91,9 @@ export default function ChatBox({ email }) {
     });
  
     return () => {
-      socket.disconnect();
+      socket.disconnect({roomKey});
     };
-  }, [usernameRef]);
+  }, [username, roomKey]);
 
   return (
     <div className="chat-container">
@@ -91,9 +110,9 @@ export default function ChatBox({ email }) {
           <textarea
             id="message-input"
             ref={messageInputRef}
-            placeholder={`Chatting as ${usernameRef.current}`}
-            rows={5}
-            cols={70}
+            placeholder={`Chatting as ${username}`}
+            rows={textFieldDims.rows}
+            cols={textFieldDims.cols}
             onKeyDown={handleKeyPress}
             maxLength="160"
           ></textarea>

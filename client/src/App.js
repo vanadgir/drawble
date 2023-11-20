@@ -4,7 +4,7 @@ import "./App.css";
 
 export default function App() {
   const [isVerified, setIsVerified] = useState(false);
-  const [userEmail, setUserEmail] = useState(null);
+  const [username, setUsername] = useState('');
   const url = "http://localhost:8080";
 
   // login redirect
@@ -30,7 +30,8 @@ export default function App() {
           const data = await response.json();
           setIsVerified(data.authenticated);
           if (data.authenticated) {
-            setUserEmail(data.email);
+            const name = data.email.split("@")[0];
+            setUsername(name);
           }
         }
       } catch (error) {
@@ -47,7 +48,7 @@ export default function App() {
       <h1>drawble</h1>
       {isVerified ? (
         <div className="game-container">
-          <RoomMenu email={userEmail}/>
+          <RoomMenu username={username}/>
           <button onClick={handleLogout}>Logout</button>
         </div>
       ) : (

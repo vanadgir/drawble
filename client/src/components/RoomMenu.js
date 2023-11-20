@@ -1,12 +1,50 @@
 import { useState, useRef } from "react";
+import { io } from "socket.io-client";
 import ChatBox from "./ChatBox";
 
-export default function RoomMenu({ email }) {
-  const [showChat, setShowChat] = useState(true);
-  const [roomKey, setRoomKey] = useState("12345");
+export default function RoomMenu({ username }) {
+  const [showChat, setShowChat] = useState(false);
+  const [roomKey, setRoomKey] = useState("");
   const roomKeyInputRef = useRef(null);
 
-  const url = "http://localhost:8080/api/";
+  // simple random string generator
+  function generateRandomString(length) {
+    const alphanumericCharacters =
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let result = "";
+
+    for (let i = 0; i < length; i++) {
+      const randomIndex = Math.floor(
+        Math.random() * alphanumericCharacters.length
+      );
+      result += alphanumericCharacters.charAt(randomIndex);
+    }
+
+    return result;
+  }
+
+  // create new room
+  const createRoom = () => {
+    const roomKey = generateRandomString(12);
+    setRoomKey(roomKey);
+    setShowChat(true);
+  };
+
+  // join active room
+  const joinRoom = (enteredRoomKey) => {
+    const socket = io("http://localhost:8080");
+
+    socket.emit("check-rooms", enteredRoomKey, (isRoomExists) => {
+      if (isRoomExists) {
+        setRoomKey(enteredRoomKey);
+        setShowChat(true);
+        roomKeyInputRef.current.value = enteredRoomKey;
+        // socket.emit("new-user-join", {username, roomKey: enteredRoomKey})
+      } else {
+        alert("Room does not exist.")
+      }
+    });
+  };
 
   // function for submitting form with Enter key
   const handleKeyPress = (event) => {
@@ -35,6 +73,7 @@ export default function RoomMenu({ email }) {
         {!showChat && !roomKey ? (
           <>
             <button onClick={createRoom}>Create Room</button>
+            <p>OR</p>
             <input
               type="text"
               placeholder="Enter room key"
@@ -48,7 +87,7 @@ export default function RoomMenu({ email }) {
           </>
         ) : (
           <>
-            <p>Room Key: {roomKey ? roomKey : roomKeyInputRef.current.value}</p>
+            <p id="key-display">Room Key: <br />{roomKey ? roomKey : roomKeyInputRef.current.value}</p>
             <button onClick={() => copyToClipboard(roomKey)}>
               Copy to Clipboard
             </button>
@@ -56,7 +95,7 @@ export default function RoomMenu({ email }) {
           </>
         )}
       </div>
-      {showChat && <ChatBox email={email} />}
+      {showChat && <ChatBox username={username} roomKey={roomKey}/>}
     </>
   );
 }

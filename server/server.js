@@ -93,20 +93,8 @@ app.get("/logout", (req, res) => {
   });
 });
 
-// simple random string generator
-function generateRandomString(length) {
-  const alphanumericCharacters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let result = '';
-  
-  for (let i = 0; i < length; i++) {
-    const randomIndex = Math.floor(Math.random() * alphanumericCharacters.length);
-    result += alphanumericCharacters.charAt(randomIndex);
-  }
-  
-  return result;
-};
-
-const activeRooms = [];
+// track active rooms
+const activeRooms = {};
 
 // track active users
 const activeUsers = {};
@@ -115,20 +103,47 @@ const activeUsers = {};
 // connect event
 io.on("connection", (socket) => {
   // new member join event
-  socket.on("join", (username) => {
-    activeUsers[socket.id] = username;
+  socket.on("join-room", ({ username, roomKey }) => {
+    socket.join(roomKey);
+    activeUsers[socket.id] = { username, roomKey };
+
+    if (!activeRooms[roomKey]) {
+      activeRooms[roomKey] = 1;
+    } else {
+      activeRooms[roomKey]++;
+    }
+
+    socket.to(roomKey).emit("user-connected", {username});
   });
 
+  socket.on("check-rooms", (roomKey, callback) => {
+    const room = io.sockets.adapter.rooms.get(roomKey);
+    const isRoomExists = room !== undefined;
+
+    callback(isRoomExists);
+  })
+
   // new message event
-  socket.on("new-message", (data) => {
-    socket.broadcast.emit("receive-message", data);
+  socket.on("new-message", ({ username, text, roomKey }) => {
+    io.to(roomKey).emit("receive-message", { username, text });
   });
 
   // disconnect event
   socket.on("disconnect", () => {
-    const disconnectedUser = activeUsers[socket.id];
+    const user = activeUsers[socket.id];
+    if (!user) return;
+
+    const { roomKey } = user;
     delete activeUsers[socket.id];
-    io.emit("user-disconnected", disconnectedUser);
+
+    if (activeRooms[roomKey]) {
+      activeRooms[roomKey]--;
+      if (activeRooms[roomKey] === 0) {
+        delete activeRooms[roomKey];
+      }
+    }
+
+    io.to(roomKey).emit("user-disconnected", user.username);
   });
 });
 
