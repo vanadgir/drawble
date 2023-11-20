@@ -93,37 +93,31 @@ app.get("/logout", (req, res) => {
   });
 });
 
-// track active rooms
-const availableRooms = [
-  { room: "123", vacant: true},
-  { room: "456", vacant: true},
-  { room: "789", vacant: true},
-];
+// simple random string generator
+function generateRandomString(length) {
+  const alphanumericCharacters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let result = '';
+  
+  for (let i = 0; i < length; i++) {
+    const randomIndex = Math.floor(Math.random() * alphanumericCharacters.length);
+    result += alphanumericCharacters.charAt(randomIndex);
+  }
+  
+  return result;
+};
 
 // create room route
 app.post("/api/createRoom", (req, res) => {
-  const vacantRoom = availableRooms.findIndex((room) => room.vacant);
-  if (vacantRoom !== -1) {
-    const roomKey = availableRooms[vacantRoom].room;
-    availableRooms[vacantRoom].vacant = false;
-
-    res.json({ roomKey });
-  } else {
-    res.status(404).send("Please wait for a vacant room.");
-  }
+  const roomKey = generateRandomString(12);
+  
+  res.json({ roomKey });
 });
 
 // join room route
 app.post("/api/joinRoom", (req, res) => {
   const { enteredRoomKey } = req.body;
-  const hostedRoom = availableRooms.findIndex(
-    (room) => room.room === enteredRoomKey && !room.vacant
-  );
-  if (hostedRoom !== -1) {
-    res.json({ enteredRoomKey });
-  } else {
-    res.status(404).send("Room not found or unavailable");
-  }
+
+  res.json({ enteredRoomKey });
 });
 
 // track active users
