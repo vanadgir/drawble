@@ -21,23 +21,24 @@ display: flex;
 justify-content: center;
 }
 
-.room-menu{
+.room-tools{
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding-bottom: 5%;
+  margin-bottom: 16px;
 }
 
-.room-controls{
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
 
 .game-container{
   display: flex;
   flex-direction: column;
   justify-content: center;
+  align-items: center;
+}
+
+.chat-container{
+  display: flex;
+  flex-direction: column;
   align-items: center;
 }
 

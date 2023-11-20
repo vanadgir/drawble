@@ -77,7 +77,7 @@ export default function ChatBox({ email }) {
   }, [usernameRef]);
 
   return (
-    <>
+    <div className="chat-container">
       <div ref={chatBoxRef} id="chat-box">
         {messages.map((message, index) => (
           <div key={index} className="message">
@@ -99,6 +99,6 @@ export default function ChatBox({ email }) {
           ></textarea>
         </form>
       </div>
-    </>
+    </div>
   );
 }

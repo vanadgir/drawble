@@ -5,7 +5,7 @@ const passport = require("passport");
 const http = require("http");
 const { Server } = require("socket.io");
 const cors = require("cors");
-require('./auth');
+require("./auth");
 
 // initialize express and passport
 const app = express();
@@ -16,11 +16,14 @@ app.use(
     credentials: true,
   })
 );
-app.use(session({ 
-  secret: process.env.EXPRESS_SESSION_SECRET,
-  resave: false,
-  saveUninitialized: false 
-}));
+app.use(express.json());
+app.use(
+  session({
+    secret: process.env.EXPRESS_SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+  })
+);
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -52,13 +55,15 @@ app.get("/", (req, res) => {
 });
 
 // google authenticate route
-app.get("/auth/google",
-  passport.authenticate('google', { scope: ['email', 'profile'] })
+app.get(
+  "/auth/google",
+  passport.authenticate("google", { scope: ["email", "profile"] })
 );
 
 // callback after authenticate, success/fail
-app.get("/google/callback", 
-  passport.authenticate('google', {
+app.get(
+  "/google/callback",
+  passport.authenticate("google", {
     successRedirect: "/",
     failureRedirect: "/auth/failure",
   })
@@ -66,14 +71,14 @@ app.get("/google/callback",
 
 // auth failure route
 app.get("/auth/failure", (req, res) => {
-  res.send("Something went wrong...")
-})
+  res.send("Something went wrong...");
+});
 
 // auth status route, protected
 app.get("/auth/status", isLoggedIn, (req, res) => {
   res.json({
     authenticated: true,
-    email: req.user.email
+    email: req.user.email,
   });
 });
 
@@ -89,11 +94,37 @@ app.get("/logout", (req, res) => {
 });
 
 // track active rooms
-const rooms = {};
+const availableRooms = [
+  { room: "123", vacant: true},
+  { room: "456", vacant: true},
+  { room: "789", vacant: true},
+];
 
-app.post("/createRoom", isLoggedIn, (req, res) => {
-  const roomKey = 12345;
-})
+// create room route
+app.post("/api/createRoom", (req, res) => {
+  const vacantRoom = availableRooms.findIndex((room) => room.vacant);
+  if (vacantRoom !== -1) {
+    const roomKey = availableRooms[vacantRoom].room;
+    availableRooms[vacantRoom].vacant = false;
+
+    res.json({ roomKey });
+  } else {
+    res.status(404).send("Please wait for a vacant room.");
+  }
+});
+
+// join room route
+app.post("/api/joinRoom", (req, res) => {
+  const { enteredRoomKey } = req.body;
+  const hostedRoom = availableRooms.findIndex(
+    (room) => room.room === enteredRoomKey && !room.vacant
+  );
+  if (hostedRoom !== -1) {
+    res.json({ enteredRoomKey });
+  } else {
+    res.status(404).send("Room not found or unavailable");
+  }
+});
 
 // track active users
 const activeUsers = {};
@@ -101,7 +132,6 @@ const activeUsers = {};
 // socket.io events
 // connect event
 io.on("connection", (socket) => {
-
   // new member join event
   socket.on("join", (username) => {
     activeUsers[socket.id] = username;
@@ -116,7 +146,7 @@ io.on("connection", (socket) => {
   socket.on("disconnect", () => {
     const disconnectedUser = activeUsers[socket.id];
     delete activeUsers[socket.id];
-    io.emit('user-disconnected', disconnectedUser);
+    io.emit("user-disconnected", disconnectedUser);
   });
 });
 
