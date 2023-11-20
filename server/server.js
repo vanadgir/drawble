@@ -106,19 +106,7 @@ function generateRandomString(length) {
   return result;
 };
 
-// create room route
-app.post("/api/createRoom", (req, res) => {
-  const roomKey = generateRandomString(12);
-  
-  res.json({ roomKey });
-});
-
-// join room route
-app.post("/api/joinRoom", (req, res) => {
-  const { enteredRoomKey } = req.body;
-
-  res.json({ enteredRoomKey });
-});
+const activeRooms = [];
 
 // track active users
 const activeUsers = {};

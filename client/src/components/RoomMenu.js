@@ -2,60 +2,11 @@ import { useState, useRef } from "react";
 import ChatBox from "./ChatBox";
 
 export default function RoomMenu({ email }) {
-  const [showChat, setShowChat] = useState(false);
-  const [roomKey, setRoomKey] = useState("");
+  const [showChat, setShowChat] = useState(true);
+  const [roomKey, setRoomKey] = useState("12345");
   const roomKeyInputRef = useRef(null);
 
   const url = "http://localhost:8080/api/";
-
-  // grab open room
-  const createRoom = async () => {
-    try {
-      const response = await fetch(`${url}createRoom`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        console.log("Room Created: ", data.roomKey);
-        setRoomKey(data.roomKey);
-        setShowChat(true);
-      } else {
-        console.error("Failed to create room:", response.statusText);
-      }
-    } catch (error) {
-      console.error("Error creating room: ", error);
-    }
-  };
-
-  // join active room
-  const joinRoom = async (enteredRoomKey) => {
-    console.log(enteredRoomKey);
-    try {
-      const response = await fetch(`${url}joinRoom`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ enteredRoomKey }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        console.log("Room Joined: ", data.enteredRoomKey);
-        setRoomKey(data.roomKey);
-        setShowChat(true);
-      } else {
-        console.error("Failed to join room:", response.statusText);
-        roomKeyInputRef.current.value = "";
-      }
-    } catch (error) {
-      console.error("Error joining room: ", error);
-    }
-  };
 
   // function for submitting form with Enter key
   const handleKeyPress = (event) => {
