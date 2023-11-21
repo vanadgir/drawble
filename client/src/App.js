@@ -47,10 +47,10 @@ export default function App() {
     <div className="main">
       <h1>drawble</h1>
       {isVerified ? (
-        <div className="game-container">
+        <>
           <RoomMenu username={username}/>
           <button onClick={handleLogout}>Logout</button>
-        </div>
+        </>
       ) : (
         <button onClick={handleLogin}>Login with Google</button>
       )}

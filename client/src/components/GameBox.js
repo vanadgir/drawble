@@ -1,9 +1,10 @@
 import { useEffect, useState, useRef } from "react";
 import { io } from "socket.io-client";
+import DrawCanvas from "./DrawCanvas";
 
 // main chat box component
-export default function ChatBox({ username, roomKey }) {
-  const [textFieldDims, setTextFieldDims] = useState({rows:5, cols:70});
+export default function GameBox({ username, roomKey }) {
+  const [textFieldDims, setTextFieldDims] = useState({ rows: 5, cols: 50 });
   const [socket, setSocket] = useState(null);
   const [messages, setMessages] = useState([]);
   const chatBoxRef = useRef(null);
@@ -33,30 +34,12 @@ export default function ChatBox({ username, roomKey }) {
   const displayMessage = (name, text) => {
     const message = {
       name,
-      text
+      text,
     };
 
     // update messages list
     setMessages((prevMessages) => [...prevMessages, message]);
   };
-
-  // function for resizing text field
-  const updateTextFieldDims = () => {
-    const rows = Math.floor(window.innerHeight / 200);
-    const cols = Math.floor(window.innerWidth / 10);
-
-    setTextFieldDims({rows, cols});
-  };
-
-  useEffect(() => {
-    window.addEventListener("resize", updateTextFieldDims);
-    updateTextFieldDims();
-
-    return () => {
-      window.removeEventListener("resize", updateTextFieldDims);
-    };
-  }, []);
-
 
   useEffect(() => {
     // focus on latest message
@@ -72,51 +55,52 @@ export default function ChatBox({ username, roomKey }) {
     // connect
     socket.on("connect", () => {
       setSocket(socket);
-      displayMessage("SYSTEM: ", `${username} has connected.`);
-      socket.emit("join-room", {username, roomKey});
+      displayMessage("SYSTEM", `${username} has connected.`);
+      socket.emit("join-room", { username, roomKey });
     });
 
-    socket.on("user-connected", ({username}) => {
-      displayMessage("SYSTEM: ", `${username} has connected.`)
+    socket.on("user-connected", ({ username }) => {
+      displayMessage("SYSTEM", `${username} has connected.`);
     });
 
     // receive broadcasted message
     socket.on("receive-message", (data) => {
-      displayMessage(data.username, data.text)
+      displayMessage(data.username, data.text);
     });
-    
+
     // user disconnect notification
     socket.on("user-disconnected", (disconnectedUser) => {
-      displayMessage("SYSTEM: ", `${disconnectedUser} has disconnected.`)
+      displayMessage("SYSTEM", `${disconnectedUser} has disconnected.`);
     });
- 
+
     return () => {
-      socket.disconnect({roomKey});
+      socket.disconnect({ roomKey });
     };
   }, [username, roomKey]);
 
   return (
-    <div className="chat-container">
-      <div ref={chatBoxRef} id="chat-box">
-        {messages.map((message, index) => (
-          <div key={index} className="message">
-            <div className="username">{message.name}</div>
-            <div className="message-text">{message.text}</div>
-          </div>
-        ))}
-      </div>
-      <div className="message-form">
-        <form onSubmit={handleSubmit}>
-          <textarea
-            id="message-input"
-            ref={messageInputRef}
-            placeholder={`Chatting as ${username}`}
-            rows={textFieldDims.rows}
-            cols={textFieldDims.cols}
-            onKeyDown={handleKeyPress}
-            maxLength="160"
-          ></textarea>
-        </form>
+    <div className="game-container">
+      <DrawCanvas />
+      <div className="chat-container">
+        <div ref={chatBoxRef} id="chat-box">
+          {messages.map((message, index) => (
+            <div key={index} className="message">
+              <div className="username">{message.name}:</div>
+              <div className="message-text">{message.text}</div>
+            </div>
+          ))}
+        </div>
+        <div className="message-form">
+          <form onSubmit={handleSubmit}>
+            <textarea
+              id="message-input"
+              ref={messageInputRef}
+              placeholder={`Chatting as ${username}`}
+              onKeyDown={handleKeyPress}
+              maxLength="160"
+            ></textarea>
+          </form>
+        </div>
       </div>
     </div>
   );

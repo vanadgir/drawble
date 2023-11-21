@@ -108,10 +108,12 @@ io.on("connection", (socket) => {
     activeUsers[socket.id] = { username, roomKey };
 
     if (!activeRooms[roomKey]) {
-      activeRooms[roomKey] = 1;
-    } else {
-      activeRooms[roomKey]++;
-    }
+      activeRooms[roomKey] = [];
+    } 
+    activeRooms[roomKey].push(socket.id)
+    
+    // console.log(activeRooms);
+    // console.log(activeUsers);
 
     socket.to(roomKey).emit("user-connected", {username});
   });
@@ -137,11 +139,17 @@ io.on("connection", (socket) => {
     delete activeUsers[socket.id];
 
     if (activeRooms[roomKey]) {
-      activeRooms[roomKey]--;
-      if (activeRooms[roomKey] === 0) {
-        delete activeRooms[roomKey];
+      const index = activeRooms[roomKey].indexOf(socket.id);
+      if (index !== -1) {
+        activeRooms[roomKey].splice(index, 1);
+        if (activeRooms[roomKey].length === 0) {
+          delete activeRooms[roomKey];
+        }
       }
     }
+
+    // console.log(activeRooms);
+    // console.log(activeUsers);
 
     io.to(roomKey).emit("user-disconnected", user.username);
   });

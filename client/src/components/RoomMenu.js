@@ -1,6 +1,6 @@
 import { useState, useRef } from "react";
 import { io } from "socket.io-client";
-import ChatBox from "./ChatBox";
+import GameBox from "./GameBox";
 
 export default function RoomMenu({ username }) {
   const [showChat, setShowChat] = useState(false);
@@ -41,7 +41,7 @@ export default function RoomMenu({ username }) {
         roomKeyInputRef.current.value = enteredRoomKey;
         // socket.emit("new-user-join", {username, roomKey: enteredRoomKey})
       } else {
-        alert("Room does not exist.")
+        alert("Room does not exist.");
       }
     });
   };
@@ -74,28 +74,35 @@ export default function RoomMenu({ username }) {
           <>
             <button onClick={createRoom}>Create Room</button>
             <p>OR</p>
-            <input
-              type="text"
-              placeholder="Enter room key"
-              id="room-key-input"
-              ref={roomKeyInputRef}
-              onKeyDown={handleKeyPress}
-            ></input>
-            <button onClick={() => joinRoom(roomKeyInputRef.current.value)}>
-              Join Room
-            </button>
+            <span className="buttons">
+              <input
+                type="text"
+                placeholder="Room Key..."
+                id="room-key-input"
+                ref={roomKeyInputRef}
+                onKeyDown={handleKeyPress}
+              ></input>
+              <button onClick={() => joinRoom(roomKeyInputRef.current.value)}>
+                Join Room
+              </button>
+            </span>
           </>
         ) : (
           <>
-            <p id="key-display">Room Key: <br />{roomKey ? roomKey : roomKeyInputRef.current.value}</p>
-            <button onClick={() => copyToClipboard(roomKey)}>
-              Copy to Clipboard
-            </button>
-            <button onClick={leaveRoom}>Leave Room</button>
+            <p id="key-display">
+              Room Key: <br />
+              {roomKey ? roomKey : roomKeyInputRef.current.value}
+            </p>
+            <span className="buttons">
+              <button onClick={() => copyToClipboard(roomKey)}>
+                Copy to Clipboard
+              </button>
+              <button onClick={leaveRoom}>Leave Room</button>
+            </span>
           </>
         )}
       </div>
-      {showChat && <ChatBox username={username} roomKey={roomKey}/>}
+      {showChat && <GameBox username={username} roomKey={roomKey} />}
     </>
   );
 }
