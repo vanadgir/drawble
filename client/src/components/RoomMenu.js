@@ -73,7 +73,6 @@ export default function RoomMenu({ username }) {
         {!showChat && !roomKey ? (
           <>
             <button onClick={createRoom}>Create Room</button>
-            <p>OR</p>
             <span className="buttons">
               <input
                 type="text"
