@@ -1,117 +1,62 @@
-import { useEffect, useRef, useState } from "react";
-import { io } from "socket.io-client";
+import { useState } from "react";
+import { useDraw } from "../hooks/useDraw";
+import { ChromePicker } from "react-color";
 
 export default function DrawCanvas({ username, roomKey }) {
-  const [isDrawing, setIsDrawing] = useState(false);
-  const [lastX, setLastX] = useState(0);
-  const [lastY, setLastY] = useState(0);
-  const gameCanvasRef = useRef(null);
+  // use custom hook
+  const { gameCanvasRef, onMouseDown, onTouchStart, handleClearCanvas } =
+    useDraw(drawLine);
 
-  const windowWidth = window.innerWidth;
+  const [color, setColor] = useState("#000");
+  const [showColorOptions, setShowColorOptions] = useState(false);
 
-  useEffect(() => {
-    const canvas = gameCanvasRef.current;
-    const ctx = canvas.getContext("2d");
-
-    ctx.strokeStyle = "black";
-    ctx.lineWidth = 3;
-    ctx.lineJoin = "round";
-    ctx.lineCap = "round";
-
-    const handleStartDrawing = (x, y) => {
-      setIsDrawing(true);
-      setLastX(x);
-      setLastY(y);
-    };
-
-    const handleDrawing = (x, y) => {
-      if (!isDrawing) return;
-
-      ctx.beginPath();
-      ctx.moveTo(lastX, lastY);
-      ctx.lineTo(x, y);
-      ctx.stroke();
-
-      setLastX(x);
-      setLastY(y);
-    };
-
-    const handleEndDrawing = () => {
-      setIsDrawing(false);
-    };
-
-    // mouse and touch start events
-    const handleMouseDown = (e) => {
-      const mouseX = e.clientX - canvas.getBoundingClientRect().left;
-      const mouseY = e.clientY - canvas.getBoundingClientRect().top;
-      handleStartDrawing(mouseX, mouseY);
-    };
-
-    const handleTouchStart = (e) => {
-      const touch = e.touches[0];
-      const touchX = touch.clientX - canvas.getBoundingClientRect().left;
-      const touchY = touch.clientY - canvas.getBoundingClientRect().top;
-      handleStartDrawing(touchX, touchY);
-    };
-
-    // mouse and touch move events
-    const handleMouseMove = (e) => {
-      const mouseX = e.clientX - canvas.getBoundingClientRect().left;
-      const mouseY = e.clientY - canvas.getBoundingClientRect().top;
-      handleDrawing(mouseX, mouseY);
-    };
-
-    const handleTouchMove = (e) => {
-      const touch = e.touches[0];
-      const touchX = touch.clientX - canvas.getBoundingClientRect().left;
-      const touchY = touch.clientY - canvas.getBoundingClientRect().top;
-      handleDrawing(touchX, touchY);
-    };
-
-    // mouse and touch end events
-    const handleMouseUp = () => {
-      handleEndDrawing();
-    };
-
-    const handleTouchEnd = () => {
-      handleEndDrawing();
-    };
-
-    // add all listeners
-    canvas.addEventListener("mousedown", handleMouseDown);
-    canvas.addEventListener("mousemove", handleMouseMove);
-    canvas.addEventListener("mouseup", handleMouseUp);
-    canvas.addEventListener("touchstart", handleTouchStart);
-    canvas.addEventListener("touchmove", handleTouchMove);
-    canvas.addEventListener("touchend", handleTouchEnd);
-
-
-    return () => {
-      canvas.removeEventListener("mousedown", handleMouseDown);
-      canvas.removeEventListener("mousemove", handleMouseMove);
-      canvas.removeEventListener("mouseup", handleMouseUp);
-      canvas.removeEventListener("touchstart", handleTouchStart);
-      canvas.removeEventListener("touchmove", handleTouchMove);
-      canvas.removeEventListener("touchend", handleTouchEnd);
-    };
-  }, [isDrawing, lastX, lastY]);
-
-  const handleClearCanvas = () => {
-    const canvas = gameCanvasRef.current;
-    const ctx = canvas.getContext("2d");
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const handleOptionChange = () => {
+    setShowColorOptions(!showColorOptions);
   };
+
+  // draw function to pass to hook
+  function drawLine({ prevPoint, currentPoint, ctx }) {
+    const { x: currX, y: currY } = currentPoint;
+    const lineColor = color;
+    const lineWidth = 4;
+
+    let startPoint = prevPoint ?? currentPoint;
+    ctx.beginPath();
+    ctx.lineWidth = lineWidth;
+    ctx.strokeStyle = lineColor;
+    ctx.moveTo(startPoint.x, startPoint.y);
+    ctx.lineTo(currX, currY);
+    ctx.stroke();
+
+    ctx.fillStyle = lineColor;
+    ctx.beginPath();
+    ctx.arc(startPoint.x, startPoint.y, 2, 0, 2 * Math.PI);
+    ctx.fill();
+  }
+
+  // use window width to determine canvas dimension
+  const windowWidth = window.innerWidth;
+  const canvasWidth = windowWidth >= 768 ? 720 : windowWidth <= 400 ? 360 : 400;
+  const canvasHeight = windowWidth >= 768 ? 540 : windowWidth <= 400 ? 240 : 300;
 
   return (
     <>
+      {showColorOptions && <span className="chrome-picker">
+        <ChromePicker color={color} onChange={(e) => setColor(e.hex)} />
+      </span>}
       <canvas
         id="game-canvas"
-        width={windowWidth >= 768 ? 720 : 400}
-        height={windowWidth >= 768 ? 540 : 300}
+        onMouseDown={onMouseDown}
+        onTouchStart={onTouchStart}
+        width={canvasWidth}
+        height={canvasHeight}
         ref={gameCanvasRef}
       />
       <button id="clear-canvas" onClick={handleClearCanvas}>
         Clear Canvas
+      </button>
+      <button id="color-options" onClick={handleOptionChange}>
+        Color Options
       </button>
     </>
   );

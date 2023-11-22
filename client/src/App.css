@@ -9,6 +9,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
+  user-select: none;
 }
 
 h1 {
@@ -51,18 +52,29 @@ h1 {
     flex-direction: column;
     justify-content: space-between;
     margin-top: 16px;
+    border: 2px solid black;
 
     #game-canvas {
-      width: 400px;
-      height: 300px;
       background-color: white;
     }
   }
 
   #clear-canvas{
     position: absolute;
+    margin: 4px;
     top: 0;
     left: 0;
+  }
+
+  #color-options{
+    position: absolute;
+    margin: 4px;
+    top: 0;
+    right: 0;
+  }
+
+  .chrome-picker{
+    position: absolute;
   }
 
   .chat-container {
@@ -72,7 +84,7 @@ h1 {
     margin-bottom: 0px;
 
     #chat-box {
-      height: 40vh;
+      height: 35vh;
       overflow: auto;
     }
 
@@ -82,7 +94,7 @@ h1 {
       align-items: center;
 
       .username {
-        margin-right: 16px;
+        margin-right: 24px;
         padding: 4px;
       }
     }
@@ -92,8 +104,8 @@ h1 {
     }
 
     #message-input {
-      height: 40px;
-      width: 400px;
+      height: 60px;
+      width: 100%;
       padding: 0px;
       margin: 0px;
       border: none;
@@ -156,6 +168,17 @@ h1 {
     top: 0;
     left: 0;
     margin: 8px;
+  }
+
+  #color-options{
+    position: absolute;
+    margin: 4px;
+    top: 0;
+    right: 0;
+  }
+
+  .chrome-picker{
+    position: absolute;
   }
 
   .chat-container {
