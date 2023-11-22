@@ -106,8 +106,8 @@ export default function DrawCanvas({ username, roomKey }) {
     <>
       <canvas
         id="game-canvas"
-        width={windowWidth > 768 ? 720 : 400}
-        height={windowWidth > 768 ? 540 : 300}
+        width={windowWidth >= 768 ? 720 : 400}
+        height={windowWidth >= 768 ? 540 : 300}
         ref={gameCanvasRef}
       />
       <button id="clear-canvas" onClick={handleClearCanvas}>

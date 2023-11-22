@@ -119,7 +119,7 @@ h1 {
   .room-tools {
     display: flex;
     flex-direction: column;
-    height: 10vh;
+    height: 9vh;
     justify-content: space-evenly;
   }
 
@@ -141,7 +141,6 @@ h1 {
     display: flex;
     flex-direction: row;
     justify-content: space-evenly;
-    margin-top: 16px;
 
     #game-canvas {
       width: 720px;
