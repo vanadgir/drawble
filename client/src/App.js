@@ -49,10 +49,10 @@ export default function App() {
       {isVerified ? (
         <>
           <RoomMenu username={username}/>
-          <button onClick={handleLogout}>Logout</button>
+          <button id="logout" onClick={handleLogout}>Logout</button>
         </>
       ) : (
-        <button onClick={handleLogin}>Login with Google</button>
+        <button id="login" onClick={handleLogin}>Login with Google</button>
       )}
     </div>
   );

@@ -1,117 +1,208 @@
-body{
+/* global styles */
+body {
   background-image: url("../public/mountain.jpg");
   background-size: 100vw 100vh;
 }
 
 .main {
   font-family: Cambria, sans-serif;
-  margin: 0;
-  padding: 0;
   display: flex;
   flex-direction: column;
-  justify-content: space-evenly;
   align-items: center;
-  height: 90vh;
-  user-select: none;
 }
 
 h1 {
+  display: flex;
   margin: 0%;
-  font-family: Cambria, sans-serif; 
+  font-family: Cambria, sans-serif;
   font-size: 2em;
 }
 
-.room-tools{
-  width: 100vw;
-  display: flex;
-  flex-direction: row;
-  justify-content: space-evenly;
-  align-items: center;
+/* mobile styles */
+@media screen and (max-width: 767px) {
+  #login {
+    position: absolute;
+    top: 30%;
+  }
+
+  .room-tools {
+    display: flex;
+    flex-direction: column;
+    height: 10vh;
+    justify-content: space-evenly;
+  }
+
+  #key-display {
+    text-align: center;
+    align-content: center;
+    background-color: white;
+    border: 1px solid black;
+    padding: 2px;
+    margin: 0px;
+  }
+
+  .buttons {
+    display: flex;
+    flex-direction: row;
+  }
+
+  .game-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    margin-top: 16px;
+
+    #game-canvas {
+      width: 400px;
+      height: 300px;
+      background-color: white;
+    }
+  }
+
+  #clear-canvas{
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+
+  .chat-container {
+    margin-top: 0px;
+    padding: 0px;
+    background-color: lightgray;
+    margin-bottom: 0px;
+
+    #chat-box {
+      height: 40vh;
+      overflow: auto;
+    }
+
+    .message {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+
+      .username {
+        margin-right: 16px;
+        padding: 4px;
+      }
+    }
+
+    .message:nth-child(odd) {
+      background-color: lightblue;
+    }
+
+    #message-input {
+      height: 40px;
+      width: 400px;
+      padding: 0px;
+      margin: 0px;
+      border: none;
+      resize: none;
+      outline: none;
+    }
+  }
+
+  #logout {
+    position: absolute;
+    bottom: 0;
+    margin-bottom: 16px;
+  }
 }
 
-.buttons{
-  display: flex;
-  flex-direction: column;
-}
+/* desktop styles */
+@media screen and (min-width: 768px) {
+  #login {
+    position: absolute;
+    top: 30%;
+  }
 
-#room-key-input{
-  text-align: center;
-  width: 15vw;
-}
+  .room-tools {
+    display: flex;
+    flex-direction: column;
+    height: 10vh;
+    justify-content: space-evenly;
+  }
 
-#key-display{
-  margin: 0%;
-  user-select: text;
-  border-style: groove;
-  background-color: white;
-  text-align: center;
-}
+  #key-display {
+    text-align: center;
+    align-content: center;
+    background-color: white;
+    border: 1px solid black;
+    padding: 2px;
+    margin: 0px;
+  }
 
-.game-container {
-  display: flex;
-  align-items: center;
-}
+  .buttons {
+    display: flex;
+    flex-direction: row;
+  }
 
-#game-canvas{
-  width: 60vw;
-  height: 60vh;
-  border: 2px solid black;
-  background-color: white;
-  border-right: 0px;
-}
+  .game-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    margin-top: 16px;
 
-.chat-container{
-  margin: 0%;
-  padding: 0%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  height: 60vh;
-  border: 2px solid black;
-  border-left: 0px;
-  width: 35vw;
-}
+    #game-canvas {
+      width: 720px;
+      height: 540px;
+      background-color: white;
+      border: 2px solid black;
+      border-right: none;
+    }
+  }
 
-#chat-box{
-  font-size: small;
-  background-color: gainsboro;
-  flex-grow: 1;
-  overflow-y: auto;
-  user-select: text;
-  width: 35vw;
-  border-top: 0px;
-}
+  #clear-canvas{
+    position: absolute;
+    top: 0;
+    left: 0;
+    margin: 8px;
+  }
 
-#chat-box .message:nth-child(odd){
-  background-color: lightblue;
-}
+  .chat-container {
+    margin-top: 0px;
+    padding: 0px;
+    background-color: lightgray;
+    margin-bottom: 0px;
+    height: 540;
+    width: 300px;
+    border: 2px solid black;
 
-.user-icon{
-  width: 30px;
-  height: 30px;
-}
+    #chat-box {
+      height: 460px;
+      overflow: auto;
+    }
 
-.message{
-  display: flex;
-  flex-direction: row;
-  padding: 2px;
-}
+    .message {
+      font-size: small;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
 
-.username{
-  min-width: 60px;
-  margin-right: 3%;
-}
+      .username {
+        margin-right: 16px;
+        padding: 4px;
+      }
+    }
 
-.message-form{
-  width: 35vw;
+    .message:nth-child(odd) {
+      background-color: lightblue;
+    }
 
-}
+    #message-input {
+      margin: 0px;
+      padding: 0px;
+      height: 76px;
+      width: 300px;
+      border: none;
+      resize: none;
+      outline: none;
+    }
+  }
 
-textarea{
-  resize: none;
-}
-
-form{
-  display: flex;
-  flex-direction: column;
+  #logout {
+    position: absolute;
+    bottom: 0;
+    margin-bottom: 16px;
+  }
 }

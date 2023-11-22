@@ -89,8 +89,7 @@ export default function RoomMenu({ username }) {
         ) : (
           <>
             <p id="key-display">
-              Room Key: <br />
-              {roomKey ? roomKey : roomKeyInputRef.current.value}
+              Room Key: {roomKey ? roomKey : roomKeyInputRef.current.value}
             </p>
             <span className="buttons">
               <button onClick={() => copyToClipboard(roomKey)}>

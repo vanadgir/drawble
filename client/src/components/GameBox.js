@@ -4,7 +4,6 @@ import DrawCanvas from "./DrawCanvas";
 
 // main chat box component
 export default function GameBox({ username, roomKey }) {
-  const [textFieldDims, setTextFieldDims] = useState({ rows: 5, cols: 50 });
   const [socket, setSocket] = useState(null);
   const [messages, setMessages] = useState([]);
   const chatBoxRef = useRef(null);
@@ -15,8 +14,6 @@ export default function GameBox({ username, roomKey }) {
     event.preventDefault();
     const text = messageInputRef.current.value;
     if (!text || !roomKey) return;
-
-    // displayMessage(username, text);
 
     socket.emit("new-message", { username, text, roomKey });
     messageInputRef.current.value = "";
@@ -80,7 +77,7 @@ export default function GameBox({ username, roomKey }) {
 
   return (
     <div className="game-container">
-      <DrawCanvas />
+      <DrawCanvas username={username} roomKey={roomKey} />
       <div className="chat-container">
         <div ref={chatBoxRef} id="chat-box">
           {messages.map((message, index) => (
@@ -90,17 +87,15 @@ export default function GameBox({ username, roomKey }) {
             </div>
           ))}
         </div>
-        <div className="message-form">
-          <form onSubmit={handleSubmit}>
-            <textarea
-              id="message-input"
-              ref={messageInputRef}
-              placeholder={`Chatting as ${username}`}
-              onKeyDown={handleKeyPress}
-              maxLength="160"
-            ></textarea>
-          </form>
-        </div>
+        <form id="message-form" onSubmit={handleSubmit}>
+          <textarea
+            id="message-input"
+            ref={messageInputRef}
+            placeholder={`Chatting as ${username}`}
+            onKeyDown={handleKeyPress}
+            maxLength="160"
+          ></textarea>
+        </form>
       </div>
     </div>
   );
