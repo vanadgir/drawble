@@ -130,6 +130,10 @@ io.on("connection", (socket) => {
     io.to(roomKey).emit("receive-message", { username, text });
   });
 
+  socket.on("draw-line", ({prevPoint, currentPoint, color, roomKey}) => {
+    socket.broadcast.to(roomKey).emit("draw-line", {prevPoint, currentPoint, color});
+  });
+
   // disconnect event
   socket.on("disconnect", () => {
     const user = activeUsers[socket.id];

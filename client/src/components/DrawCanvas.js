@@ -1,43 +1,44 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useDraw } from "../hooks/useDraw";
 import { ChromePicker } from "react-color";
+import { drawLine } from "../utils/drawLine";
+import { io } from "socket.io-client";
+
+const socket = io("http://localhost:8080");
 
 export default function DrawCanvas({ username, roomKey }) {
   // use custom hook
   const { gameCanvasRef, onMouseDown, onTouchStart, handleClearCanvas } =
-    useDraw(drawLine);
+    useDraw(createLine);
 
   const [color, setColor] = useState("#000");
   const [showColorOptions, setShowColorOptions] = useState(false);
+
+  
+  // use window width to determine canvas dimension
+  const windowWidth = window.innerWidth;
+  const canvasWidth = windowWidth >= 768 ? 720 : windowWidth <= 400 ? 360 : 400;
+  const canvasHeight = windowWidth >= 768 ? 540 : windowWidth <= 400 ? 240 : 300;
 
   const handleOptionChange = () => {
     setShowColorOptions(!showColorOptions);
   };
 
-  // draw function to pass to hook
-  function drawLine({ prevPoint, currentPoint, ctx }) {
-    const { x: currX, y: currY } = currentPoint;
-    const lineColor = color;
-    const lineWidth = 4;
+  useEffect(() => {
+    const ctx = gameCanvasRef.current.getContext("2d");
+    
+    socket.on("draw-line", ({ prevPoint, currentPoint, color}) => {
+      if (!ctx) return;
 
-    let startPoint = prevPoint ?? currentPoint;
-    ctx.beginPath();
-    ctx.lineWidth = lineWidth;
-    ctx.strokeStyle = lineColor;
-    ctx.moveTo(startPoint.x, startPoint.y);
-    ctx.lineTo(currX, currY);
-    ctx.stroke();
+      drawLine({prevPoint, currentPoint, ctx, color});
+    })
+  }, []);
 
-    ctx.fillStyle = lineColor;
-    ctx.beginPath();
-    ctx.arc(startPoint.x, startPoint.y, 2, 0, 2 * Math.PI);
-    ctx.fill();
-  }
-
-  // use window width to determine canvas dimension
-  const windowWidth = window.innerWidth;
-  const canvasWidth = windowWidth >= 768 ? 720 : windowWidth <= 400 ? 360 : 400;
-  const canvasHeight = windowWidth >= 768 ? 540 : windowWidth <= 400 ? 240 : 300;
+  // function to draw line and emit event
+  function createLine({ prevPoint, currentPoint, ctx }) {
+    socket.emit("draw-line", ({ prevPoint, currentPoint, color, roomKey}));
+    drawLine({prevPoint, currentPoint, ctx, color});
+  };
 
   return (
     <>
