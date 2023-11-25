@@ -131,7 +131,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("draw-line", ({prevPoint, currentPoint, color, roomKey}) => {
-    socket.broadcast.to(roomKey).emit("draw-line", {prevPoint, currentPoint, color});
+    socket.broadcast.emit("draw-line", {prevPoint, currentPoint, color});
   });
 
   // disconnect event
