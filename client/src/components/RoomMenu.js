@@ -100,7 +100,7 @@ export default function RoomMenu({ username }) {
           </>
         )}
       </div>
-      {showChat && <GameBox username={username} roomKey={roomKey} />}
+      {/* showChat && <GameBox username={username} roomKey={roomKey} /> */}
     </>
   );
 }

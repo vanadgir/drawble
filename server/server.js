@@ -102,60 +102,10 @@ const activeUsers = {};
 // socket.io events
 // connect event
 io.on("connection", (socket) => {
-  // new member join event
-  socket.on("join-room", ({ username, roomKey }) => {
-    socket.join(roomKey);
-    activeUsers[socket.id] = { username, roomKey };
-
-    if (!activeRooms[roomKey]) {
-      activeRooms[roomKey] = [];
-    } 
-    activeRooms[roomKey].push(socket.id)
-    
-    // console.log(activeRooms);
-    // console.log(activeUsers);
-
-    socket.to(roomKey).emit("user-connected", {username});
-  });
-
-  socket.on("check-rooms", (roomKey, callback) => {
-    const room = io.sockets.adapter.rooms.get(roomKey);
-    const isRoomExists = room !== undefined;
-
-    callback(isRoomExists);
-  })
-
-  // new message event
-  socket.on("new-message", ({ username, text, roomKey }) => {
-    io.to(roomKey).emit("receive-message", { username, text });
-  });
-
-  socket.on("draw-line", ({prevPoint, currentPoint, color, roomKey}) => {
-    socket.broadcast.emit("draw-line", {prevPoint, currentPoint, color});
-  });
 
   // disconnect event
   socket.on("disconnect", () => {
-    const user = activeUsers[socket.id];
-    if (!user) return;
 
-    const { roomKey } = user;
-    delete activeUsers[socket.id];
-
-    if (activeRooms[roomKey]) {
-      const index = activeRooms[roomKey].indexOf(socket.id);
-      if (index !== -1) {
-        activeRooms[roomKey].splice(index, 1);
-        if (activeRooms[roomKey].length === 0) {
-          delete activeRooms[roomKey];
-        }
-      }
-    }
-
-    // console.log(activeRooms);
-    // console.log(activeUsers);
-
-    io.to(roomKey).emit("user-disconnected", user.username);
   });
 });
 
