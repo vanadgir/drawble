@@ -1,12 +1,11 @@
 import { useState, useRef } from "react";
-import { useSocket } from "../contexts/useSocket";
+import { io } from "socket.io-client";
 import GameBox from "./GameBox";
 
 export default function RoomMenu({ username }) {
   const [showChat, setShowChat] = useState(false);
   const [roomKey, setRoomKey] = useState("");
   const roomKeyInputRef = useRef(null);
-  const { socket } = useSocket();
 
   // simple random string generator
   function generateRandomString(length) {
@@ -24,26 +23,27 @@ export default function RoomMenu({ username }) {
     return result;
   }
 
+  // create new room
+  const createRoom = () => {
+    const roomKey = generateRandomString(12);
+    setRoomKey(roomKey);
+    setShowChat(true);
+  };
+
   // join active room
   const joinRoom = (enteredRoomKey) => {
+    const socket = io("http://localhost:8080");
+
     socket.emit("check-rooms", enteredRoomKey, (isRoomExists) => {
       if (isRoomExists) {
         setRoomKey(enteredRoomKey);
         setShowChat(true);
         roomKeyInputRef.current.value = enteredRoomKey;
+        // socket.emit("new-user-join", {username, roomKey: enteredRoomKey})
       } else {
         alert("Room does not exist.");
       }
     });
-  };
-
-  // create new room
-  const createRoom = () => {
-    const roomKey = generateRandomString(12);
-    // connect
-    socket.emit("join-room", { username, roomKey });
-    setRoomKey(roomKey);
-    setShowChat(true);
   };
 
   // function for submitting form with Enter key

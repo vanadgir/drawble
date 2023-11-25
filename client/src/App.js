@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { SocketContext, SocketProvider } from "./contexts/useSocket";
 import RoomMenu from "./components/RoomMenu";
 import "./App.css";
 
@@ -49,9 +48,7 @@ export default function App() {
       <h1>drawble</h1>
       {isVerified ? (
         <>
-          <SocketProvider>
-            <RoomMenu username={username}/>
-          </SocketProvider>
+          <RoomMenu username={username}/>
           <button id="logout" onClick={handleLogout}>Logout</button>
         </>
       ) : (
