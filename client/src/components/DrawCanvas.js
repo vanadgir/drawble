@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
+import { useSocket } from "../contexts/useSocket";
 import { useDraw } from "../hooks/useDraw";
 import { ChromePicker } from "react-color";
 import { drawLine } from "../utils/drawLine";
-import { io } from "socket.io-client";
 
-const socket = io("http://localhost:8080");
 
 export default function DrawCanvas({ username, roomKey }) {
   // use custom hook
@@ -14,6 +13,7 @@ export default function DrawCanvas({ username, roomKey }) {
   const [color, setColor] = useState("#000");
   const [showColorOptions, setShowColorOptions] = useState(false);
 
+  const {socket} = useSocket();
   
   // use window width to determine canvas dimension
   const windowWidth = window.innerWidth;
@@ -31,12 +31,12 @@ export default function DrawCanvas({ username, roomKey }) {
       if (!ctx) return;
 
       drawLine({prevPoint, currentPoint, ctx, color});
-    })
+    });
   }, []);
 
   // function to draw line and emit event
   function createLine({ prevPoint, currentPoint, ctx }) {
-    socket.emit("draw-line", ({ prevPoint, currentPoint, color, roomKey}));
+    socket.emit("draw-line", { prevPoint, currentPoint, color, roomKey});
     drawLine({prevPoint, currentPoint, ctx, color});
   };
 

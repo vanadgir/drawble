@@ -109,13 +109,14 @@ io.on("connection", (socket) => {
 
     if (!activeRooms[roomKey]) {
       activeRooms[roomKey] = [];
-    } 
-    activeRooms[roomKey].push(socket.id)
-    
+    }
+    activeRooms[roomKey].push(socket.id);
+
     // console.log(activeRooms);
     // console.log(activeUsers);
+    console.log(io.sockets.adapter.rooms.get(roomKey));
 
-    socket.to(roomKey).emit("user-connected", {username});
+    socket.to(roomKey).emit("user-connected", { username });
   });
 
   socket.on("check-rooms", (roomKey, callback) => {
@@ -123,15 +124,16 @@ io.on("connection", (socket) => {
     const isRoomExists = room !== undefined;
 
     callback(isRoomExists);
-  })
+  });
 
   // new message event
   socket.on("new-message", ({ username, text, roomKey }) => {
     io.to(roomKey).emit("receive-message", { username, text });
   });
 
-  socket.on("draw-line", ({prevPoint, currentPoint, color, roomKey}) => {
-    socket.broadcast.to(roomKey).emit("draw-line", {prevPoint, currentPoint, color});
+  socket.on("draw-line", ({ prevPoint, currentPoint, color, roomKey }) => {
+    // socket.broadcast.emit("draw-line", { prevPoint, currentPoint, color });
+    // io.to(roomKey).emit("draw-line", { prevPoint, currentPoint, color });
   });
 
   // disconnect event
@@ -147,6 +149,7 @@ io.on("connection", (socket) => {
       if (index !== -1) {
         activeRooms[roomKey].splice(index, 1);
         if (activeRooms[roomKey].length === 0) {
+          socket.leave(roomKey);
           delete activeRooms[roomKey];
         }
       }
