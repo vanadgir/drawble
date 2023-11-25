@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import RoomMenu from "./components/RoomMenu";
+import ViewController from "./components/ViewController";
 import "./App.css";
 
 export default function App() {
@@ -48,7 +48,7 @@ export default function App() {
       <h1>drawble</h1>
       {isVerified ? (
         <>
-          <RoomMenu username={username}/>
+          <ViewController username={username}/> 
           <button id="logout" onClick={handleLogout}>Logout</button>
         </>
       ) : (
