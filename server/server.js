@@ -102,7 +102,8 @@ const activeUsers = {};
 // socket.io events
 // connect event
 io.on("connection", (socket) => {
-  // new member join event
+  console.log(`Socket Connection Started: ${socket.id}`);
+
   socket.on("join-room", ({ username, roomKey }) => {
     socket.join(roomKey);
     activeUsers[socket.id] = { username, roomKey };
@@ -112,8 +113,8 @@ io.on("connection", (socket) => {
     } 
     activeRooms[roomKey].push(socket.id)
     
-    // console.log(activeRooms);
-    // console.log(activeUsers);
+    console.log(activeRooms);
+    console.log(activeUsers);
 
     socket.to(roomKey).emit("user-connected", {username});
   });
@@ -125,21 +126,12 @@ io.on("connection", (socket) => {
     callback(isRoomExists);
   })
 
-  // new message event
-  socket.on("new-message", ({ username, text, roomKey }) => {
-    io.to(roomKey).emit("receive-message", { username, text });
-  });
-
-  socket.on("draw-line", ({prevPoint, currentPoint, color, roomKey}) => {
-    socket.broadcast.emit("draw-line", {prevPoint, currentPoint, color});
-  });
-
-  // disconnect event
-  socket.on("disconnect", () => {
+  socket.on("leave-room", () => {
     const user = activeUsers[socket.id];
     if (!user) return;
 
     const { roomKey } = user;
+    socket.leave(roomKey);
     delete activeUsers[socket.id];
 
     if (activeRooms[roomKey]) {
@@ -152,10 +144,24 @@ io.on("connection", (socket) => {
       }
     }
 
-    // console.log(activeRooms);
-    // console.log(activeUsers);
+    console.log(activeRooms);
+    console.log(activeUsers);
 
     io.to(roomKey).emit("user-disconnected", user.username);
+  })
+
+  // new message event
+  socket.on("new-message", ({ username, text, roomKey }) => {
+    io.to(roomKey).emit("receive-message", { username, text });
+  });
+
+  socket.on("draw-line", ({prevPoint, currentPoint, color, roomKey}) => {
+    io.to(roomKey).emit("draw-line", {prevPoint, currentPoint, color});
+  });
+
+  // disconnect event
+  socket.on("disconnect", () => {
+    console.log(`Socket Connection Ended: ${socket.id}`);
   });
 });
 

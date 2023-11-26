@@ -1,57 +1,17 @@
-import { useState, useRef } from "react";
-import { io } from "socket.io-client";
+import { useRef } from "react";
+import { useSocket } from "../contexts/SocketContext";
 import GameBox from "./GameBox";
 
 export default function RoomMenu({ username }) {
-  const [showChat, setShowChat] = useState(false);
-  const [roomKey, setRoomKey] = useState("");
   const roomKeyInputRef = useRef(null);
-
-  // simple random string generator
-  function generateRandomString(length) {
-    const alphanumericCharacters =
-      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    let result = "";
-
-    for (let i = 0; i < length; i++) {
-      const randomIndex = Math.floor(
-        Math.random() * alphanumericCharacters.length
-      );
-      result += alphanumericCharacters.charAt(randomIndex);
-    }
-
-    return result;
-  }
-
-  // create new room
-  const createRoom = () => {
-    const roomKey = generateRandomString(12);
-    setRoomKey(roomKey);
-    setShowChat(true);
-  };
-
-  // join active room
-  const joinRoom = (enteredRoomKey) => {
-    const socket = io("http://localhost:8080");
-
-    socket.emit("check-rooms", enteredRoomKey, (isRoomExists) => {
-      if (isRoomExists) {
-        setRoomKey(enteredRoomKey);
-        setShowChat(true);
-        roomKeyInputRef.current.value = enteredRoomKey;
-        // socket.emit("new-user-join", {username, roomKey: enteredRoomKey})
-      } else {
-        alert("Room does not exist.");
-      }
-    });
-  };
+  const {roomKey, createRoom, joinRoom, leaveRoom} = useSocket();
 
   // function for submitting form with Enter key
   const handleKeyPress = (event) => {
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
       const roomKey = roomKeyInputRef.current.value;
-      joinRoom(roomKey);
+      joinRoom({username, roomKey});
     }
   };
 
@@ -61,18 +21,12 @@ export default function RoomMenu({ username }) {
     alert("Room Key copied to clipboard!");
   };
 
-  // leave room and chat
-  const leaveRoom = () => {
-    setRoomKey("");
-    setShowChat(false);
-  };
-
   return (
     <>
       <div className="room-tools">
-        {!showChat && !roomKey ? (
+        {!roomKey ? (
           <>
-            <button onClick={createRoom}>Create Room</button>
+            <button onClick={() => createRoom(username)}>Create Room</button>
             <span className="buttons">
               <input
                 type="text"
@@ -81,7 +35,7 @@ export default function RoomMenu({ username }) {
                 ref={roomKeyInputRef}
                 onKeyDown={handleKeyPress}
               ></input>
-              <button onClick={() => joinRoom(roomKeyInputRef.current.value)}>
+              <button onClick={() => joinRoom({username, room: roomKeyInputRef.current.value})}>
                 Join Room
               </button>
             </span>
@@ -95,12 +49,12 @@ export default function RoomMenu({ username }) {
               <button onClick={() => copyToClipboard(roomKey)}>
                 Copy to Clipboard
               </button>
-              <button onClick={leaveRoom}>Leave Room</button>
+              <button onClick={() => leaveRoom({roomKey})}>Leave Room</button>
             </span>
           </>
         )}
       </div>
-      {showChat && <GameBox username={username} roomKey={roomKey} />}
+      {roomKey && <GameBox username={username} roomKey={roomKey} />}
     </>
   );
 }
