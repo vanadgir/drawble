@@ -168,6 +168,28 @@ io.on("connection", (socket) => {
   // disconnect event
   socket.on("disconnect", () => {
     console.log(`Socket Connection Ended: ${socket.id}`);
+
+    const user = activeUsers[socket.id];
+    if (!user) return;
+
+    const { roomKey } = user;
+    socket.leave(roomKey);
+    delete activeUsers[socket.id];
+
+    if (activeRooms[roomKey]) {
+      const index = activeRooms[roomKey].indexOf(socket.id);
+      if (index !== -1) {
+        activeRooms[roomKey].splice(index, 1);
+        if (activeRooms[roomKey].length === 0) {
+          delete activeRooms[roomKey];
+        }
+      }
+    }
+
+    console.log(activeRooms);
+    console.log(activeUsers);
+
+    io.to(roomKey).emit("user-disconnected", user.username);
   });
 });
 
