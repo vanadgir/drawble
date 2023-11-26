@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
-import ViewController from "./components/ViewController";
+import { SocketProvider } from "./contexts/SocketContext";
+import RoomMenu from "./components/RoomMenu";
 import "./App.css";
 
 export default function App() {
   const [isVerified, setIsVerified] = useState(false);
-  const [username, setUsername] = useState('');
+  const [username, setUsername] = useState("");
   const url = "http://localhost:8080";
 
   // login redirect
@@ -32,23 +33,28 @@ export default function App() {
           if (data.authenticated) {
             const name = data.email.split("@")[0];
             setUsername(name);
+            console.log(username);
           }
         }
       } catch (error) {
         console.error("Error checking authentication:", error);
         setIsVerified(false);
+        setEmail(""),
+        setUsername("");
       }
     };
 
     checkAuthentication();
-  }, []);
+  }, [email, username]);
 
   return (
     <div className="main">
       <h1>drawble</h1>
       {isVerified ? (
         <>
-          <ViewController username={username}/> 
+          <SocketProvider>
+            <RoomMenu username={username}/> 
+          </SocketProvider>
           <button id="logout" onClick={handleLogout}>Logout</button>
         </>
       ) : (

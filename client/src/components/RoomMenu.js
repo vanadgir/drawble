@@ -1,9 +1,9 @@
-import { useState, useRef } from "react";
-import { io } from "socket.io-client";
-import GameBox from "./GameBox";
+import { useRef } from "react";
+import { useSocket } from "../contexts/SocketContext";
 
 export default function RoomMenu({ username }) {
   const roomKeyInputRef = useRef(null);
+  const {roomKey, createRoom, joinRoom, leaveRoom} = useSocket();
 
   // function for submitting form with Enter key
   const handleKeyPress = (event) => {
@@ -23,7 +23,7 @@ export default function RoomMenu({ username }) {
   return (
     <>
       <div className="room-tools">
-        {!showChat && !roomKey ? (
+        {!roomKey ? (
           <>
             <button onClick={createRoom}>Create Room</button>
             <span className="buttons">

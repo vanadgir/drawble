@@ -1,6 +1,7 @@
 import { useContext, createContext, useState, useEffect, useCallback } from "react";
 import { io } from "socket.io-client";
 
+// helper function for string gen
 function generateRandomString(length) {
   const alphanumericCharacters =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -16,6 +17,7 @@ function generateRandomString(length) {
   return result;
 }
 
+// define variables of context
 export const SocketContext = createContext({
   socket: null,
   roomKey: null,
@@ -24,10 +26,12 @@ export const SocketContext = createContext({
   leaveRoom: () => {}
 });
 
+// define provider
 export function SocketProvider({ children }) {
   const [socket, setSocket] = useState(null);
   const [roomKey, setRoomKey] = useState(null);
 
+  // start socket connection on component load
   useEffect(() => {
     const newSocket = io("http://localhost:8080");
     setSocket(newSocket);
@@ -35,21 +39,30 @@ export function SocketProvider({ children }) {
     return () => newSocket.disconnect();
   }, []);
 
+  // create room function
   const createRoom = useCallback(() => {
     if (socket) {
       const room = generateRandomString(12);
-      socket.emit("create-room", {room});
+      socket.emit("join-room", {user, room});
       setRoomKey(room);
     }
   }, [socket]);
 
+  // join room function
   const joinRoom = useCallback(({room}) => {
     if (socket) {
-      socket.emit("join-room", {room});
-      setRoomKey(room);
+      console.log(room);
+      socket.emit("check-rooms", room, (isRoomExists) => {
+        if (isRoomExists) {
+          setRoomKey(room);
+        } else {
+          alert("Room does not exist.");
+        }
+      });
     }
   }, [socket]);
 
+  // leave room function
   const leaveRoom = useCallback(() => {
     if (socket) {
       socket.emit("leave-room");
@@ -64,6 +77,7 @@ export function SocketProvider({ children }) {
   )
 }
 
+// verify context exists when used
 export function useSocket() {
   if (!SocketContext) {
     throw new Error("SocketContext must be defined");

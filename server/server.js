@@ -102,10 +102,33 @@ const activeUsers = {};
 // socket.io events
 // connect event
 io.on("connection", (socket) => {
+  console.log("Socket Connection Started");
+
+  socket.on("join-room", ({ username, roomKey }) => {
+    socket.join(roomKey);
+    activeUsers[socket.id] = { username, roomKey };
+
+    if (!activeRooms[roomKey]) {
+      activeRooms[roomKey] = [];
+    } 
+    activeRooms[roomKey].push(socket.id)
+    
+    // console.log(activeRooms);
+    // console.log(activeUsers);
+
+    socket.to(roomKey).emit("user-connected", {username});
+  });
+
+  socket.on("check-rooms", (roomKey, callback) => {
+    const room = io.sockets.adapter.rooms.get(roomKey);
+    const isRoomExists = room !== undefined;
+
+    callback(isRoomExists);
+  })
 
   // disconnect event
   socket.on("disconnect", () => {
-
+    console.log("Socket Connection Ended");
   });
 });
 
