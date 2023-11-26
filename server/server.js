@@ -155,9 +155,15 @@ io.on("connection", (socket) => {
     io.to(roomKey).emit("receive-message", { username, text });
   });
 
+  // draw line event
   socket.on("draw-line", ({prevPoint, currentPoint, color, roomKey}) => {
     io.to(roomKey).emit("draw-line", {prevPoint, currentPoint, color});
   });
+
+  // clear canvas event
+  socket.on("clear", ({roomKey}) => {
+    io.to(roomKey).emit("clear");
+  })
 
   // disconnect event
   socket.on("disconnect", () => {

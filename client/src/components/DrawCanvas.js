@@ -27,14 +27,17 @@ export default function DrawCanvas({ }) {
   useEffect(() => {
     const ctx = gameCanvasRef.current.getContext("2d");
     
-    socket.on("draw-line", ({ prevPoint, currentPoint, color, roomKey}) => {
+    socket.on("draw-line", ({ prevPoint, currentPoint, color }) => {
       if (!ctx) return;
 
       drawLine({prevPoint, currentPoint, ctx, color});
-    })
+    });
+
+    socket.on("clear", handleClearCanvas)
 
     return () => {
       socket.off("draw-line");
+      socket.off("clear");
     }
   }, [roomKey]);
 
@@ -57,7 +60,7 @@ export default function DrawCanvas({ }) {
         height={canvasHeight}
         ref={gameCanvasRef}
       />
-      <button id="clear-canvas" onClick={handleClearCanvas}>
+      <button id="clear-canvas" onClick={() => socket.emit("clear", ({roomKey}))}>
         Clear Canvas
       </button>
       <button id="color-options" onClick={handleOptionChange}>
