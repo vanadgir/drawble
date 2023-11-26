@@ -156,8 +156,8 @@ io.on("connection", (socket) => {
   });
 
   // draw line event
-  socket.on("draw-line", ({prevPoint, currentPoint, color, roomKey}) => {
-    io.to(roomKey).emit("draw-line", {prevPoint, currentPoint, color});
+  socket.on("draw-line", ({prevPoint, currentPoint, color, roomKey, myDimensions}) => {
+    io.to(roomKey).emit("draw-line", {prevPoint, currentPoint, color, dimensions: myDimensions});
   });
 
   // clear canvas event
