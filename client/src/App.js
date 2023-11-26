@@ -33,19 +33,17 @@ export default function App() {
           if (data.authenticated) {
             const name = data.email.split("@")[0];
             setUsername(name);
-            console.log(username);
           }
         }
       } catch (error) {
         console.error("Error checking authentication:", error);
         setIsVerified(false);
-        setEmail(""),
         setUsername("");
       }
     };
 
     checkAuthentication();
-  }, [email, username]);
+  }, [username]);
 
   return (
     <div className="main">

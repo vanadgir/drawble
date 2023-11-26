@@ -40,21 +40,21 @@ export function SocketProvider({ children }) {
   }, []);
 
   // create room function
-  const createRoom = useCallback(() => {
+  const createRoom = useCallback((username) => {
     if (socket) {
       const room = generateRandomString(12);
-      socket.emit("join-room", {user, room});
+      socket.emit("join-room", {username, roomKey: room});
       setRoomKey(room);
     }
   }, [socket]);
 
   // join room function
-  const joinRoom = useCallback(({room}) => {
+  const joinRoom = useCallback(({username, room}) => {
     if (socket) {
-      console.log(room);
       socket.emit("check-rooms", room, (isRoomExists) => {
         if (isRoomExists) {
           setRoomKey(room);
+          socket.emit("join-room", {username, roomKey: room});
         } else {
           alert("Room does not exist.");
         }
@@ -63,9 +63,9 @@ export function SocketProvider({ children }) {
   }, [socket]);
 
   // leave room function
-  const leaveRoom = useCallback(() => {
+  const leaveRoom = useCallback(({room}) => {
     if (socket) {
-      socket.emit("leave-room");
+      socket.emit("leave-room", {roomKey: room});
       setRoomKey(null);
     }
   }, [socket]);

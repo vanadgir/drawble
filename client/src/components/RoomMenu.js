@@ -1,5 +1,6 @@
 import { useRef } from "react";
 import { useSocket } from "../contexts/SocketContext";
+import GameBox from "./GameBox";
 
 export default function RoomMenu({ username }) {
   const roomKeyInputRef = useRef(null);
@@ -10,7 +11,7 @@ export default function RoomMenu({ username }) {
     if (event.key === "Enter" && !event.shiftKey) {
       event.preventDefault();
       const roomKey = roomKeyInputRef.current.value;
-      joinRoom(roomKey);
+      joinRoom({username, roomKey});
     }
   };
 
@@ -25,7 +26,7 @@ export default function RoomMenu({ username }) {
       <div className="room-tools">
         {!roomKey ? (
           <>
-            <button onClick={createRoom}>Create Room</button>
+            <button onClick={() => createRoom(username)}>Create Room</button>
             <span className="buttons">
               <input
                 type="text"
@@ -34,7 +35,7 @@ export default function RoomMenu({ username }) {
                 ref={roomKeyInputRef}
                 onKeyDown={handleKeyPress}
               ></input>
-              <button onClick={() => joinRoom(roomKeyInputRef.current.value)}>
+              <button onClick={() => joinRoom({username, room: roomKeyInputRef.current.value})}>
                 Join Room
               </button>
             </span>
@@ -48,12 +49,12 @@ export default function RoomMenu({ username }) {
               <button onClick={() => copyToClipboard(roomKey)}>
                 Copy to Clipboard
               </button>
-              <button onClick={leaveRoom}>Leave Room</button>
+              <button onClick={() => leaveRoom({roomKey})}>Leave Room</button>
             </span>
           </>
         )}
       </div>
-      {/* showChat && <GameBox username={username} roomKey={roomKey} /> */}
+      {roomKey && <GameBox username={username} roomKey={roomKey} />}
     </>
   );
 }

@@ -1,13 +1,13 @@
 import { useEffect, useState, useRef } from "react";
-import { io } from "socket.io-client";
 import DrawCanvas from "./DrawCanvas";
+import { useSocket } from "../contexts/SocketContext";
 
 // main chat box component
 export default function GameBox({ username, roomKey }) {
-  const [socket, setSocket] = useState(null);
   const [messages, setMessages] = useState([]);
   const chatBoxRef = useRef(null);
   const messageInputRef = useRef(null);
+  const {socket} = useSocket();
 
   // function for submitting form
   const handleSubmit = (event) => {
@@ -47,15 +47,6 @@ export default function GameBox({ username, roomKey }) {
 
   // socket connection events
   useEffect(() => {
-    const socket = io("http://localhost:8080");
-
-    // connect
-    socket.on("connect", () => {
-      setSocket(socket);
-      displayMessage("SYSTEM", `${username} has connected.`);
-      socket.emit("join-room", { username, roomKey });
-    });
-
     socket.on("user-connected", ({ username }) => {
       displayMessage("SYSTEM", `${username} has connected.`);
     });
@@ -71,13 +62,15 @@ export default function GameBox({ username, roomKey }) {
     });
 
     return () => {
-      socket.disconnect({ roomKey });
-    };
+      socket.off("user-connected");
+      socket.off("receive-message");
+      socket.off("user-disconnected");
+    }
   }, [username, roomKey]);
 
   return (
     <div className="game-container">
-      <DrawCanvas username={username} roomKey={roomKey} />
+      <DrawCanvas />
       <div className="chat-container">
         <div ref={chatBoxRef} id="chat-box">
           {messages.map((message, index) => (
