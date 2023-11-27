@@ -55,14 +55,12 @@ app.get("/", (req, res) => {
 });
 
 // google authenticate route
-app.get(
-  "/auth/google",
+app.get("/auth/google",
   passport.authenticate("google", { scope: ["email", "profile"] })
 );
 
 // callback after authenticate, success/fail
-app.get(
-  "/google/callback",
+app.get("/google/callback",
   passport.authenticate("google", {
     successRedirect: "/",
     failureRedirect: "/auth/failure",
@@ -91,6 +89,11 @@ app.get("/logout", (req, res) => {
     }
     res.clearCookie("connect.sid").redirect("/");
   });
+});
+
+// simple route to verify server running
+app.get("/test-route", (req, res) => {
+  res.json({status: "running"});
 });
 
 const mysql = require("mysql2");
