@@ -1,10 +1,10 @@
 const express = require("express");
 const session = require("express-session");
+const cors = require("cors");
 const helmet = require("helmet");
 const passport = require("passport");
 const http = require("http");
 const { Server } = require("socket.io");
-const cors = require("cors");
 require("./auth");
 
 // initialize express and passport
