@@ -93,11 +93,68 @@ app.get("/logout", (req, res) => {
   });
 });
 
+const mysql = require("mysql2");
+// create mysql pool
+const pool = mysql.createPool({
+  connectionLimit: 10,
+  host: process.env.DB_HOST,
+  port: process.env.DB_PORT,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+  multipleStatements: true
+});
+
+pool.getConnection((err, connection) => {
+  if (err) {
+    console.error("Error connecting to MySQL Database: ", err);
+    return;
+  };  
+  
+  connection.query(process.env.DB_INIT, (err) => {
+    if (err) {
+      console.error("Error initiating database ", err);
+      return;
+    }
+  });
+
+  connection.release();
+});
+
 // track active rooms
-const activeRooms = {};
+let activeRooms = {};
 
 // track active users
-const activeUsers = {};
+let activeUsers = {};
+
+const updateRooms = (connection) => {
+    connection.query(process.env.DB_SELECT_ROOMS, (err, results) => {
+      if (err) {
+        console.error("Error getting rooms: ", err);
+        return;
+      }
+      activeRooms = {};
+      results.forEach((room) => {
+        if (!activeRooms[room.roomKey]) {
+          activeRooms[room.roomKey] = [];
+        }
+        activeRooms[room.roomKey].push(room.socketId);
+      });
+    });
+}
+
+const updateUsers = (connection) => {
+  connection.query(process.env.DB_SELECT_USERS, (err, results) => {
+    if (err) {
+      console.error("Error getting rooms: ", err);
+      return;
+    }
+    activeUsers = {};
+    results.forEach((user) => {
+      activeUsers[user.socketId] = { username: user.username, roomKey: user.roomKey }
+    })
+  });
+}
 
 // socket.io events
 // connect event
@@ -105,17 +162,33 @@ io.on("connection", (socket) => {
   console.log(`Socket Connection Started: ${socket.id}`);
 
   socket.on("join-room", ({ username, roomKey }) => {
+    pool.getConnection((err, connection) => {
+      if (err) {
+        console.error("Error connecting to MySQL Database: ", err);
+        return;
+      };  
+      const newUser = {socketId: socket.id, username: username, roomKey: roomKey};
+      const newRoom = {roomKey: roomKey};
+
+      connection.query(process.env.DB_USER_ENTER_ROOM, newUser, (err) => {
+        if (err) {
+          console.error("Error adding record to database ", err);
+          return;
+        }
+        updateUsers(connection);
+      });
+  
+      connection.query(process.env.DB_INSERT_ROOM, newRoom, (err) => {
+        if (err) {
+          console.error("Error adding record to database ", err);
+          return;
+        }
+        updateRooms(connection);
+      });
+      connection.release();
+    });
+
     socket.join(roomKey);
-    activeUsers[socket.id] = { username, roomKey };
-
-    if (!activeRooms[roomKey]) {
-      activeRooms[roomKey] = [];
-    } 
-    activeRooms[roomKey].push(socket.id)
-    
-    console.log(activeRooms);
-    console.log(activeUsers);
-
     socket.to(roomKey).emit("user-connected", {username});
   });
 
@@ -132,22 +205,40 @@ io.on("connection", (socket) => {
 
     const { roomKey } = user;
     socket.leave(roomKey);
-    delete activeUsers[socket.id];
-
-    if (activeRooms[roomKey]) {
-      const index = activeRooms[roomKey].indexOf(socket.id);
-      if (index !== -1) {
-        activeRooms[roomKey].splice(index, 1);
-        if (activeRooms[roomKey].length === 0) {
-          delete activeRooms[roomKey];
-        }
-      }
-    }
-
-    console.log(activeRooms);
-    console.log(activeUsers);
 
     io.to(roomKey).emit("user-disconnected", user.username);
+
+    pool.getConnection((err, connection) => {
+      if (err) {
+        console.error("Error connecting to MySQL Database: ", err);
+        return;
+      };  
+
+      connection.query(process.env.DB_USER_LEAVE_ROOM, socket.id, (err) => {
+        if (err) {
+          console.error("Error finding user: ", err);
+          return;
+        }
+        updateUsers(connection);
+      });
+
+      connection.query(process.env.DB_CHECK_ROOM, roomKey, (err, results) => {
+        if (err) {
+          console.error("Error finding room: ", err);
+          return;
+        }
+        if (results[0].count==0) {
+          connection.query(process.env.DB_DELETE_ROOM, roomKey, (err) => {
+            if (err) {
+              console.error("Error finding room: ", err);
+              return;
+            }
+            updateRooms(connection);
+          })
+        }
+      });
+      connection.release();
+    });
   })
 
   // new message event
@@ -167,6 +258,7 @@ io.on("connection", (socket) => {
 
   // disconnect event
   socket.on("disconnect", () => {
+
     console.log(`Socket Connection Ended: ${socket.id}`);
 
     const user = activeUsers[socket.id];
@@ -174,22 +266,40 @@ io.on("connection", (socket) => {
 
     const { roomKey } = user;
     socket.leave(roomKey);
-    delete activeUsers[socket.id];
-
-    if (activeRooms[roomKey]) {
-      const index = activeRooms[roomKey].indexOf(socket.id);
-      if (index !== -1) {
-        activeRooms[roomKey].splice(index, 1);
-        if (activeRooms[roomKey].length === 0) {
-          delete activeRooms[roomKey];
-        }
-      }
-    }
-
-    console.log(activeRooms);
-    console.log(activeUsers);
 
     io.to(roomKey).emit("user-disconnected", user.username);
+
+    pool.getConnection((err, connection) => {
+      if (err) {
+        console.error("Error connecting to MySQL Database: ", err);
+        return;
+      };  
+
+      connection.query(process.env.DB_USER_LEAVE_ROOM, socket.id, (err) => {
+        if (err) {
+          console.error("Error finding user: ", err);
+          return;
+        }
+        updateUsers(connection);
+      });
+
+      connection.query(process.env.DB_CHECK_ROOM, roomKey, (err, results) => {
+        if (err) {
+          console.error("Error finding room: ", err);
+          return;
+        }
+        if (results[0].count==0) {
+          connection.query(process.env.DB_DELETE_ROOM, roomKey, (err, results) => {
+            if (err) {
+              console.error("Error finding room: ", err);
+              return;
+            }
+            updateRooms(connection);
+          })
+        }
+      });
+      connection.release();
+    });
   });
 });
 
