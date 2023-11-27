@@ -105,6 +105,7 @@ const pool = mysql.createPool({
   multipleStatements: true
 });
 
+// intitiate database on server start
 pool.getConnection((err, connection) => {
   if (err) {
     console.error("Error connecting to MySQL Database: ", err);
@@ -127,6 +128,7 @@ let activeRooms = {};
 // track active users
 let activeUsers = {};
 
+// massage db data into local activeRooms object
 const updateRooms = (connection) => {
     connection.query(process.env.DB_SELECT_ROOMS, (err, results) => {
       if (err) {
@@ -143,6 +145,7 @@ const updateRooms = (connection) => {
     });
 }
 
+// massage db data into local activeUsers object
 const updateUsers = (connection) => {
   connection.query(process.env.DB_SELECT_USERS, (err, results) => {
     if (err) {
@@ -159,9 +162,10 @@ const updateUsers = (connection) => {
 // socket.io events
 // connect event
 io.on("connection", (socket) => {
-  console.log(`Socket Connection Started: ${socket.id}`);
-
+  // join room event
   socket.on("join-room", ({ username, roomKey }) => {
+
+    // get mysql connection
     pool.getConnection((err, connection) => {
       if (err) {
         console.error("Error connecting to MySQL Database: ", err);
@@ -170,6 +174,7 @@ io.on("connection", (socket) => {
       const newUser = {socketId: socket.id, username: username, roomKey: roomKey};
       const newRoom = {roomKey: roomKey};
 
+      // query for inserting user into table
       connection.query(process.env.DB_USER_ENTER_ROOM, newUser, (err) => {
         if (err) {
           console.error("Error adding record to database ", err);
@@ -178,6 +183,7 @@ io.on("connection", (socket) => {
         updateUsers(connection);
       });
   
+      // query for inserting room into table
       connection.query(process.env.DB_INSERT_ROOM, newRoom, (err) => {
         if (err) {
           console.error("Error adding record to database ", err);
@@ -188,10 +194,14 @@ io.on("connection", (socket) => {
       connection.release();
     });
 
+    // socket joins room
     socket.join(roomKey);
+
+    // user connected message
     socket.to(roomKey).emit("user-connected", {username});
   });
 
+  // check if room exists
   socket.on("check-rooms", (roomKey, callback) => {
     const room = io.sockets.adapter.rooms.get(roomKey);
     const isRoomExists = room !== undefined;
@@ -199,6 +209,7 @@ io.on("connection", (socket) => {
     callback(isRoomExists);
   })
 
+  // leave room event
   socket.on("leave-room", () => {
     const user = activeUsers[socket.id];
     if (!user) return;
@@ -208,12 +219,14 @@ io.on("connection", (socket) => {
 
     io.to(roomKey).emit("user-disconnected", user.username);
 
+    // get mysql connection
     pool.getConnection((err, connection) => {
       if (err) {
         console.error("Error connecting to MySQL Database: ", err);
         return;
       };  
 
+      // query for removing user from table
       connection.query(process.env.DB_USER_LEAVE_ROOM, socket.id, (err) => {
         if (err) {
           console.error("Error finding user: ", err);
@@ -222,6 +235,7 @@ io.on("connection", (socket) => {
         updateUsers(connection);
       });
 
+      // query for checking if room empty
       connection.query(process.env.DB_CHECK_ROOM, roomKey, (err, results) => {
         if (err) {
           console.error("Error finding room: ", err);
@@ -258,9 +272,6 @@ io.on("connection", (socket) => {
 
   // disconnect event
   socket.on("disconnect", () => {
-
-    console.log(`Socket Connection Ended: ${socket.id}`);
-
     const user = activeUsers[socket.id];
     if (!user) return;
 
@@ -269,12 +280,14 @@ io.on("connection", (socket) => {
 
     io.to(roomKey).emit("user-disconnected", user.username);
 
+    // get mysql connection
     pool.getConnection((err, connection) => {
       if (err) {
         console.error("Error connecting to MySQL Database: ", err);
         return;
       };  
 
+      // query for removing user from table
       connection.query(process.env.DB_USER_LEAVE_ROOM, socket.id, (err) => {
         if (err) {
           console.error("Error finding user: ", err);
@@ -283,6 +296,7 @@ io.on("connection", (socket) => {
         updateUsers(connection);
       });
 
+      // query for checking if room empty
       connection.query(process.env.DB_CHECK_ROOM, roomKey, (err, results) => {
         if (err) {
           console.error("Error finding room: ", err);
@@ -305,7 +319,6 @@ io.on("connection", (socket) => {
 
 // set port and start server
 const port = process.env.DEV_SERVER_PORT;
-
 server.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
