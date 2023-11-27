@@ -162,9 +162,18 @@ const updateUsers = (connection) => {
   });
 }
 
+// function for getting current timestamp
+const getTimestamp = () => {
+  const currentDate = new Date();
+  const timestampString = `${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(currentDate.getDate()).padStart(2, '0')}-${currentDate.getFullYear()} ${String(currentDate.getHours()).padStart(2, '0')}:${String(currentDate.getMinutes()).padStart(2, '0')}:${String(currentDate.getSeconds()).padStart(2, '0')}`;
+  return timestampString;
+}
+
 // socket.io events
 // connect event
 io.on("connection", (socket) => {
+  console.log(getTimestamp(), "START Socket Connection:", socket.id);
+
   // join room event
   socket.on("join-room", ({ username, roomKey }) => {
 
@@ -291,6 +300,7 @@ io.on("connection", (socket) => {
 
   // disconnect event
   socket.on("disconnect", () => {
+    console.log(getTimestamp(), "STOP Socket Connection:", socket.id);
     const user = activeUsers[socket.id];
     if (!user) return;
 
@@ -339,5 +349,5 @@ io.on("connection", (socket) => {
 // set port and start server
 const port = process.env.DEV_SERVER_PORT;
 server.listen(port, () => {
-  console.log(`Server running on port ${port}`);
+  console.log(getTimestamp(), `Server running on port ${port}`);
 });
