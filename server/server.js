@@ -94,6 +94,7 @@ app.get("/logout", (req, res) => {
 });
 
 const mysql = require("mysql2");
+const { connect } = require("http2");
 // create mysql pool
 const pool = mysql.createPool({
   connectionLimit: 10,
@@ -203,10 +204,26 @@ io.on("connection", (socket) => {
 
   // check if room exists
   socket.on("check-rooms", (roomKey, callback) => {
-    const room = io.sockets.adapter.rooms.get(roomKey);
-    const isRoomExists = room !== undefined;
+    pool.getConnection((err, connection) => {
+      if (err) {
+        console.error("Error connecting to MySQL Database: ", err);
+        callback(false);
+        return;
+      }
 
-    callback(isRoomExists);
+      // query for checking room table 
+      connection.query(process.env.DB_CHECK_ROOM, roomKey, (err, results) => {
+        if (err) {
+          console.error("Error finding room: ", err)
+          callback(false);
+        }
+        if (results[0].room_exists === 1) {
+          callback(true);
+        } else {
+          callback(false);
+        }
+      })
+    })
   })
 
   // leave room event
@@ -236,7 +253,7 @@ io.on("connection", (socket) => {
       });
 
       // query for checking if room empty
-      connection.query(process.env.DB_CHECK_ROOM, roomKey, (err, results) => {
+      connection.query(process.env.DB_CHECK_USER_COUNT, roomKey, (err, results) => {
         if (err) {
           console.error("Error finding room: ", err);
           return;
@@ -297,7 +314,7 @@ io.on("connection", (socket) => {
       });
 
       // query for checking if room empty
-      connection.query(process.env.DB_CHECK_ROOM, roomKey, (err, results) => {
+      connection.query(process.env.DB_CHECK_USER_COUNT, roomKey, (err, results) => {
         if (err) {
           console.error("Error finding room: ", err);
           return;
