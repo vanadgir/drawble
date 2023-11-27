@@ -22,14 +22,29 @@ export default function DrawCanvas({}) {
   }, []);
 
   useEffect(() => {
-    const canvasWidth = windowWidth >= 768 ? 720 : windowWidth <= 400 ? 360 : 400;
-    const canvasHeight = windowWidth >= 768 ? 540 : windowWidth <= 400 ? 240 : 300;
+    const canvasWidth =
+      windowWidth >= 768 ? 720 : windowWidth <= 400 ? 360 : 400;
+    const canvasHeight =
+      windowWidth >= 768 ? 540 : windowWidth <= 400 ? 240 : 300;
     setMyDimensions({ x: canvasWidth, y: canvasHeight });
   }, [windowWidth]);
 
   const handleOptionChange = () => {
     setShowColorOptions(!showColorOptions);
   };
+
+  // right click to show color options
+  useEffect(() => {
+    const handleContextMenu = (e) => {
+      e.preventDefault();
+      setShowColorOptions(!showColorOptions);
+    };
+    window.addEventListener("contextmenu", handleContextMenu);
+
+    return () => {
+      window.removeEventListener("contextmenu", handleContextMenu);
+    };
+  }, [showColorOptions]);
 
   useEffect(() => {
     const ctx = gameCanvasRef.current.getContext("2d");
