@@ -94,7 +94,6 @@ app.get("/logout", (req, res) => {
 });
 
 const mysql = require("mysql2");
-const { connect } = require("http2");
 // create mysql pool
 const pool = mysql.createPool({
   connectionLimit: 10,
