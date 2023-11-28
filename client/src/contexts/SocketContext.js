@@ -33,7 +33,7 @@ export function SocketProvider({ children }) {
 
   // start socket connection on component load
   useEffect(() => {
-    const newSocket = io("http://localhost:8080");
+    const newSocket = io("https://drawbleserver.varun.pro");
     setSocket(newSocket);
 
     return () => newSocket.disconnect();

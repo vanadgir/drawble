@@ -6,7 +6,7 @@ import "./App.css";
 export default function App() {
   const [isVerified, setIsVerified] = useState(false);
   const [username, setUsername] = useState("");
-  const url = "http://localhost:8080";
+  const url = "https://drawbleserver.varun.pro";
 
   // login redirect
   const handleLogin = () => {
@@ -25,15 +25,19 @@ export default function App() {
       try {
         const response = await fetch(`${url}/auth/status`, {
           method: "GET",
-          credentials: "include",
+          credentials: "include"
         });
+        console.log(response);
         if (response.ok) {
           const data = await response.json();
+          console.log(data);
           setIsVerified(data.authenticated);
           if (data.authenticated) {
             const name = data.email.split("@")[0];
             setUsername(name);
           }
+        } else {
+          console.log("Could not get response");
         }
       } catch (error) {
         console.error("Error checking authentication:", error);
@@ -43,7 +47,7 @@ export default function App() {
     };
 
     checkAuthentication();
-  }, [username]);
+  }, []);
 
   return (
     <div className="main">
