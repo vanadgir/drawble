@@ -27,10 +27,8 @@ export default function App() {
           method: "GET",
           credentials: "include"
         });
-        console.log(response);
         if (response.ok) {
           const data = await response.json();
-          console.log(data);
           setIsVerified(data.authenticated);
           if (data.authenticated) {
             const name = data.email.split("@")[0];

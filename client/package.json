@@ -2,6 +2,7 @@
   "name": "drawble",
   "version": "0.1.0",
   "description": "MET CS 602 Term Project",
+  "homepage": "vanadgir.github.io/drawble",
   "scripts": {
     "start": "react-scripts start",
     "predeploy": "npm run build",
