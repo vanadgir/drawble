@@ -108,16 +108,33 @@ const pool = mysql.createPool({
   multipleStatements: true
 });
 
+// function for timestamp string
+const getTimestamp = () => {
+  const currentDate = new Date();
+  const options = {
+    timeZone: 'America/New_York',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  };
+
+  const timestampString = currentDate.toLocaleString('en-US', options);
+  return timestampString;
+};
+
 // intitiate database on server start
 pool.getConnection((err, connection) => {
   if (err) {
-    console.error("Error connecting to MySQL Database: ", err);
+    console.error(getTimestamp(), "Error connecting to MySQL Database: ", err);
     return;
   };  
   
   connection.query(process.env.DB_INIT, (err) => {
     if (err) {
-      console.error("Error initiating database ", err);
+      console.error(getTimestamp(), "Error initiating database ", err);
       return;
     }
   });
@@ -135,7 +152,7 @@ let activeUsers = {};
 const updateRooms = (connection) => {
     connection.query(process.env.DB_SELECT_ROOMS, (err, results) => {
       if (err) {
-        console.error("Error getting rooms: ", err);
+        console.error(getTimestamp(), "Error getting rooms: ", err);
         return;
       }
       activeRooms = {};
@@ -152,7 +169,7 @@ const updateRooms = (connection) => {
 const updateUsers = (connection) => {
   connection.query(process.env.DB_SELECT_USERS, (err, results) => {
     if (err) {
-      console.error("Error getting rooms: ", err);
+      console.error(getTimestamp(), "Error getting rooms: ", err);
       return;
     }
     activeUsers = {};
@@ -160,13 +177,6 @@ const updateUsers = (connection) => {
       activeUsers[user.socketId] = { username: user.username, roomKey: user.roomKey }
     })
   });
-}
-
-// function for getting current timestamp
-const getTimestamp = () => {
-  const currentDate = new Date();
-  const timestampString = `${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(currentDate.getDate()).padStart(2, '0')}-${currentDate.getFullYear()} ${String(currentDate.getHours()).padStart(2, '0')}:${String(currentDate.getMinutes()).padStart(2, '0')}:${String(currentDate.getSeconds()).padStart(2, '0')}`;
-  return timestampString;
 }
 
 // socket.io events
@@ -180,7 +190,7 @@ io.on("connection", (socket) => {
     // get mysql connection
     pool.getConnection((err, connection) => {
       if (err) {
-        console.error("Error connecting to MySQL Database: ", err);
+        console.error(getTimestamp(), "Error connecting to MySQL Database: ", err);
         return;
       };  
       const newUser = {socketId: socket.id, username: username, roomKey: roomKey};
@@ -189,7 +199,7 @@ io.on("connection", (socket) => {
       // query for inserting user into table
       connection.query(process.env.DB_USER_ENTER_ROOM, newUser, (err) => {
         if (err) {
-          console.error("Error adding record to database ", err);
+          console.error(getTimestamp(), "Error adding record to database ", err);
           return;
         }
         updateUsers(connection);
@@ -198,7 +208,7 @@ io.on("connection", (socket) => {
       // query for inserting room into table
       connection.query(process.env.DB_INSERT_ROOM, newRoom, (err) => {
         if (err) {
-          console.error("Error adding record to database ", err);
+          console.error(getTimestamp(), "Error adding record to database ", err);
           return;
         }
         updateRooms(connection);
@@ -217,7 +227,7 @@ io.on("connection", (socket) => {
   socket.on("check-rooms", (roomKey, callback) => {
     pool.getConnection((err, connection) => {
       if (err) {
-        console.error("Error connecting to MySQL Database: ", err);
+        console.error(getTimestamp(), "Error connecting to MySQL Database: ", err);
         callback(false);
         return;
       }
@@ -225,7 +235,7 @@ io.on("connection", (socket) => {
       // query for checking room table 
       connection.query(process.env.DB_CHECK_ROOM, roomKey, (err, results) => {
         if (err) {
-          console.error("Error finding room: ", err)
+          console.error(getTimestamp(), "Error finding room: ", err)
           callback(false);
         }
         if (results[0].room_exists === 1) {
@@ -250,14 +260,14 @@ io.on("connection", (socket) => {
     // get mysql connection
     pool.getConnection((err, connection) => {
       if (err) {
-        console.error("Error connecting to MySQL Database: ", err);
+        console.error(getTimestamp(), "Error connecting to MySQL Database: ", err);
         return;
       };  
 
       // query for removing user from table
       connection.query(process.env.DB_USER_LEAVE_ROOM, socket.id, (err) => {
         if (err) {
-          console.error("Error finding user: ", err);
+          console.error(getTimestamp(), "Error finding user: ", err);
           return;
         }
         updateUsers(connection);
@@ -266,13 +276,13 @@ io.on("connection", (socket) => {
       // query for checking if room empty
       connection.query(process.env.DB_CHECK_USER_COUNT, roomKey, (err, results) => {
         if (err) {
-          console.error("Error finding room: ", err);
+          console.error(getTimestamp(), "Error finding room: ", err);
           return;
         }
         if (results[0].count==0) {
           connection.query(process.env.DB_DELETE_ROOM, roomKey, (err) => {
             if (err) {
-              console.error("Error finding room: ", err);
+              console.error(getTimestamp(), "Error finding room: ", err);
               return;
             }
             updateRooms(connection);
@@ -312,14 +322,14 @@ io.on("connection", (socket) => {
     // get mysql connection
     pool.getConnection((err, connection) => {
       if (err) {
-        console.error("Error connecting to MySQL Database: ", err);
+        console.error(getTimestamp(), "Error connecting to MySQL Database: ", err);
         return;
       };  
 
       // query for removing user from table
       connection.query(process.env.DB_USER_LEAVE_ROOM, socket.id, (err) => {
         if (err) {
-          console.error("Error finding user: ", err);
+          console.error(getTimestamp(), "Error finding user: ", err);
           return;
         }
         updateUsers(connection);
@@ -328,13 +338,13 @@ io.on("connection", (socket) => {
       // query for checking if room empty
       connection.query(process.env.DB_CHECK_USER_COUNT, roomKey, (err, results) => {
         if (err) {
-          console.error("Error finding room: ", err);
+          console.error(getTimestamp(), "Error finding room: ", err);
           return;
         }
         if (results[0].count==0) {
           connection.query(process.env.DB_DELETE_ROOM, roomKey, (err, results) => {
             if (err) {
-              console.error("Error finding room: ", err);
+              console.error(getTimestamp(), "Error finding room: ", err);
               return;
             }
             updateRooms(connection);
