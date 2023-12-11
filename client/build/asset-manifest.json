@@ -1,14 +1,14 @@
 {
   "files": {
     "main.css": "/vanadgir.github.io/drawble/static/css/main.f6f05be2.css",
-    "main.js": "/vanadgir.github.io/drawble/static/js/main.8b58fd1c.js",
+    "main.js": "/vanadgir.github.io/drawble/static/js/main.e32ee6e3.js",
     "static/media/background.png": "/vanadgir.github.io/drawble/static/media/background.63ed797b6ce63480beea.png",
     "index.html": "/vanadgir.github.io/drawble/index.html",
     "main.f6f05be2.css.map": "/vanadgir.github.io/drawble/static/css/main.f6f05be2.css.map",
-    "main.8b58fd1c.js.map": "/vanadgir.github.io/drawble/static/js/main.8b58fd1c.js.map"
+    "main.e32ee6e3.js.map": "/vanadgir.github.io/drawble/static/js/main.e32ee6e3.js.map"
   },
   "entrypoints": [
     "static/css/main.f6f05be2.css",
-    "static/js/main.8b58fd1c.js"
+    "static/js/main.e32ee6e3.js"
   ]
 }

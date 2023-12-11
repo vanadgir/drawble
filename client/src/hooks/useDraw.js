@@ -50,6 +50,7 @@ export const useDraw = (onDraw) => {
       const ctx = gameCanvasRef.current.getContext("2d");
       if (!ctx || !currentPoint) return;
 
+      e.preventDefault();
       onDraw({ ctx, currentPoint, prevPoint: prevPoint.current });
       prevPoint.current = currentPoint;
     };
@@ -77,9 +78,9 @@ export const useDraw = (onDraw) => {
     // add listeners if canvas exists
     if (canvasRef){
       canvasRef.addEventListener('mousemove', mouseHandler);
-      canvasRef.addEventListener('touchmove', touchHandler);
+      canvasRef.addEventListener('touchmove', touchHandler, {passive: false});
       window.addEventListener('mouseup', mouseUpHandler);
-      window.addEventListener('touchend', stopTouchHandler);
+      window.addEventListener('touchend', stopTouchHandler, {passive: false});
     }
 
     // unload listeners if canvas exists
