@@ -39,10 +39,11 @@ export default function DrawCanvas({}) {
       e.preventDefault();
       setShowColorOptions(!showColorOptions);
     };
-    window.addEventListener("contextmenu", handleContextMenu);
+    const canvas = gameCanvasRef.current;
+    canvas.addEventListener("contextmenu", handleContextMenu);
 
     return () => {
-      window.removeEventListener("contextmenu", handleContextMenu);
+      canvas.removeEventListener("contextmenu", handleContextMenu);
     };
   }, [showColorOptions]);
 
