@@ -38,7 +38,7 @@ export function SocketProvider({ children }) {
     // rejoin room on reconnect
     newSocket.on("connect", () => {
       if(roomKey) {
-        socket.emit("join-room", {username, roomKey: room});
+        socket.emit("join-room", {username, roomKey: roomKey});
       }
     });
 
