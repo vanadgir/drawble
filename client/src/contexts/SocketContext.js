@@ -34,8 +34,15 @@ export function SocketProvider({ children }) {
   // start socket connection on component load
   useEffect(() => {
     const newSocket = io("http://localhost:8080");
-    setSocket(newSocket);
 
+    // rejoin room on reconnect
+    newSocket.on("connect", () => {
+      if(roomKey) {
+        socket.emit("join-room", {username, roomKey: roomKey});
+      }
+    });
+
+    setSocket(newSocket);
     return () => newSocket.disconnect();
   }, []);
 
