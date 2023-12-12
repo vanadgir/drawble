@@ -38,11 +38,13 @@ export function SocketProvider({ children }) {
     // rejoin room on reconnect
     newSocket.on("connect", () => {
       if(roomKey) {
+        console.log(roomKey);
         socket.emit("join-room", {username, roomKey: roomKey});
       }
     });
 
     setSocket(newSocket);
+    console.log("Socket Connection Established");
     return () => newSocket.disconnect();
   }, []);
 
